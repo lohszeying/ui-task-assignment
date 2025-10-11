@@ -5,7 +5,7 @@ import type { Skills } from './tasks'
 export interface Developer {
   developerId: string
   developerName: string
-  skills: Skills[]
+  skills?: Skills[]
 }
 
 const DEVELOPERS_ENDPOINT = '/developers'

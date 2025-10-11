@@ -13,7 +13,7 @@ export const useTaskAssigneeManager = (tasks: Task[] | undefined) => {
     }
 
     const mappedAssignees = tasks.reduce<Record<string, string>>((accumulator, task) => {
-      accumulator[task.taskId] = task.developer?.developerId ?? ''
+      accumulator[task.taskId] = task.developer?.developerId ?? 'unassigned'
       return accumulator
     }, {})
 
@@ -25,38 +25,54 @@ export const useTaskAssigneeManager = (tasks: Task[] | undefined) => {
       taskService.updateTaskDeveloper(taskId, developerId),
   })
 
+  const unassignAssigneeMutation = useMutation({
+    mutationFn: ({ taskId }: { taskId: string }) => taskService.unassignTaskDeveloper(taskId),
+  })
+
   const getAssigneeValue = (task: Task) =>
-    selectedAssignees[task.taskId] ?? task.developer?.developerId ?? ''
+    selectedAssignees[task.taskId] ?? task.developer?.developerId ?? 'unassigned'
 
   const handleAssigneeChange = (task: Task) =>
     async (event: ChangeEvent<HTMLSelectElement>) => {
       const nextDeveloperId = event.target.value
       const previousDeveloperId = getAssigneeValue(task)
 
-      if (!nextDeveloperId || nextDeveloperId === previousDeveloperId) {
-        // Ignore selections that are the placeholder or unchanged.
-        if (!nextDeveloperId) {
-          setSelectedAssignees((current) => ({
-            ...current,
-            [task.taskId]: previousDeveloperId,
-          }))
-        }
+      if (nextDeveloperId === previousDeveloperId) {
+        return
+      }
+
+      const isUnassign = nextDeveloperId === 'unassigned'
+
+      if (!nextDeveloperId) {
+        // placeholder selection, keep previous value in the UI.
+        setSelectedAssignees((current) => ({
+          ...current,
+          [task.taskId]: previousDeveloperId,
+        }))
         return
       }
 
       setError(null)
       setSelectedAssignees((current) => ({
         ...current,
-        [task.taskId]: nextDeveloperId,
+        [task.taskId]: isUnassign ? 'unassigned' : nextDeveloperId,
       }))
 
       setPendingTaskId(task.taskId)
 
       try {
-        await updateAssigneeMutation.mutateAsync({
-          taskId: task.taskId,
-          developerId: nextDeveloperId,
-        })
+        if (isUnassign) {
+          await unassignAssigneeMutation.mutateAsync({ taskId: task.taskId })
+          setSelectedAssignees((current) => ({
+            ...current,
+            [task.taskId]: 'unassigned',
+          }))
+        } else {
+          await updateAssigneeMutation.mutateAsync({
+            taskId: task.taskId,
+            developerId: nextDeveloperId,
+          })
+        }
       } catch (mutationError) {
         const message =
           mutationError instanceof Error
@@ -76,7 +92,7 @@ export const useTaskAssigneeManager = (tasks: Task[] | undefined) => {
     getAssigneeValue,
     handleAssigneeChange,
     pendingTaskId,
-    isUpdating: updateAssigneeMutation.isPending,
+    isUpdating: updateAssigneeMutation.isPending || unassignAssigneeMutation.isPending,
     error,
   }
 }

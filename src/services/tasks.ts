@@ -50,6 +50,10 @@ class TaskService {
       body: { developerId },
     })
   }
+
+  public unassignTaskDeveloper = async (taskId: string) => {
+    await httpClient.delete(this.baseUrl, `${TASKS_ENDPOINT}/${taskId}/developer`)
+  }
 }
 
 export const taskService = new TaskService(appConfig.url.core)

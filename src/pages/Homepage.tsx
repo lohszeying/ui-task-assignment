@@ -65,7 +65,7 @@ const buildAssigneeOptions = (developers: Developer[], currentDeveloper?: Develo
 
   return (
     <>
-      <option value="">Select assignee</option>
+      <option value="unassigned">Unassigned</option>
       {!hasCurrentDeveloper && currentDeveloper && (
         <option value={currentDeveloper.developerId}>{currentDeveloper.developerName}</option>
       )}
