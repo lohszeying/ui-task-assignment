@@ -1,9 +1,11 @@
 import type { ChangeEvent } from 'react'
 import { type Task, type Skills } from '../services/tasks'
 import { type Status } from '../services/statuses'
+import { type Developer } from '../services/developers'
 import { useTasksQuery } from '../features/tasks/hooks/useTasksQuery'
 import { useStatusesQuery } from '../features/tasks/hooks/useStatusesQuery'
 import { useTaskStatusManager } from '../features/tasks/hooks/useTaskStatusManager'
+import { useDevelopersQuery } from '../features/tasks/hooks/useDevelopersQuery'
 
 const formatSkills = (skills?: Skills[]) => {
   if (!skills || skills.length === 0) return 'N/A'
@@ -31,17 +33,76 @@ const buildStatusOptions = (statuses: Status[], currentStatusName: string) => {
   )
 }
 
-const renderTaskRow = (
-  task: Task,
-  statusList: Status[],
-  getStatusValue: (task: Task) => string,
-  handleStatusChange: (task: Task) => (event: ChangeEvent<HTMLSelectElement>) => void,
-  isDisabled: boolean,
-) => {
-  const currentStatusName = getStatusValue(task)
+const filterDevelopersBySkills = (developers: Developer[], skills?: Skills[]) => {
+  if (!skills || skills.length === 0) {
+    return developers
+  }
+
+  const requiredSkillIds = Array.from(
+    new Set(skills.map((skill) => skill.skillId).filter((id): id is number => typeof id === 'number')),
+  )
+
+  if (requiredSkillIds.length === 0) {
+    return developers
+  }
+
+  return developers.filter((developer) => {
+    const developerSkillIds = new Set(
+      (developer.skills ?? [])
+        .map((skill) => skill.skillId)
+        .filter((id): id is number => typeof id === 'number'),
+    )
+
+    return requiredSkillIds.every((skillId) => developerSkillIds.has(skillId))
+  })
+}
+
+const buildAssigneeOptions = (developers: Developer[], currentDeveloper?: Developer) => {
+  const hasCurrentDeveloper = currentDeveloper
+    ? developers.some((developer) => developer.developerId === currentDeveloper.developerId)
+    : false
 
   return (
-    <tr key={task.taskId}>
+    <>
+      <option value="">Select assignee</option>
+      {!hasCurrentDeveloper && currentDeveloper && (
+        <option value={currentDeveloper.developerId}>{currentDeveloper.developerName}</option>
+      )}
+      {developers.map((developer) => (
+        <option key={developer.developerId} value={developer.developerId}>
+          {developer.developerName}
+        </option>
+      ))}
+    </>
+  )
+}
+
+type TaskRowProps = {
+  task: Task
+  statuses: Status[]
+  developers: Developer[]
+  developersLoading: boolean
+  getStatusValue: (task: Task) => string
+  onStatusChange: (task: Task) => (event: ChangeEvent<HTMLSelectElement>) => void
+  disableStatus: boolean
+}
+
+const TaskRow = ({
+  task,
+  statuses,
+  developers,
+  developersLoading,
+  getStatusValue,
+  onStatusChange,
+  disableStatus,
+}: TaskRowProps) => {
+  const availableDevelopers = filterDevelopersBySkills(developers, task.skills)
+  const currentStatusName = getStatusValue(task)
+  const currentAssigneeId = task.developer?.developerId ?? ''
+  const isAssigneeDisabled = developersLoading
+
+  return (
+    <tr>
       <td>
         <div className="fw-semibold">{task.title}</div>
       </td>
@@ -52,24 +113,19 @@ const renderTaskRow = (
         <select
           className="form-select form-select-sm w-auto d-inline-block"
           value={currentStatusName}
-          onChange={handleStatusChange(task)}
-          disabled={isDisabled}
+          onChange={onStatusChange(task)}
+          disabled={disableStatus}
         >
-          {buildStatusOptions(statusList, currentStatusName)}
+          {buildStatusOptions(statuses, currentStatusName)}
         </select>
       </td>
       <td className="text-center">
         <select
           className="form-select form-select-sm w-auto d-inline-block"
-          defaultValue={task.developer?.developerId ?? ''}
-          disabled
+          value={currentAssigneeId}
+          disabled={isAssigneeDisabled}
         >
-          <option value="">Select assignee</option>
-          {task.developer?.developerId && (
-            <option value={task.developer.developerId}>
-              {task.developer.developerName}
-            </option>
-          )}
+          {buildAssigneeOptions(availableDevelopers, task.developer)}
         </select>
       </td>
     </tr>
@@ -79,6 +135,7 @@ const renderTaskRow = (
 export const Homepage = () => {
   const { tasks, isLoading: isTasksLoading, error: tasksError } = useTasksQuery()
   const { statuses, isLoading: isStatusesLoading } = useStatusesQuery()
+  const { developers, isLoading: isDevelopersLoading } = useDevelopersQuery()
 
   const {
     getStatusValue,
@@ -133,14 +190,20 @@ export const Homepage = () => {
               <tbody>
                 {tasks.map((task) => {
                   const isUpdatingThisTask = pendingTaskId === task.taskId && isUpdating
-                  const isDisabled = !showStatusDropdown || isUpdatingThisTask || isStatusesLoading
+                  const disableStatus =
+                    !showStatusDropdown || isUpdatingThisTask || isStatusesLoading
 
-                  return renderTaskRow(
-                    task,
-                    statuses,
-                    getStatusValue,
-                    handleStatusChange,
-                    isDisabled,
+                  return (
+                    <TaskRow
+                      key={task.taskId}
+                      task={task}
+                      statuses={statuses}
+                      developers={developers}
+                      developersLoading={isDevelopersLoading}
+                      getStatusValue={getStatusValue}
+                      onStatusChange={handleStatusChange}
+                      disableStatus={disableStatus}
+                    />
                   )
                 })}
               </tbody>
