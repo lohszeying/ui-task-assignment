@@ -44,6 +44,12 @@ class TaskService {
       body: { statusId },
     })
   }
+
+  public updateTaskDeveloper = async (taskId: string, developerId: string) => {
+    await httpClient.patch(this.baseUrl, `${TASKS_ENDPOINT}/${taskId}/developer`, {
+      body: { developerId },
+    })
+  }
 }
 
 export const taskService = new TaskService(appConfig.url.core)

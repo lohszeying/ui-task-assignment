@@ -6,6 +6,7 @@ import { useTasksQuery } from '../features/tasks/hooks/useTasksQuery'
 import { useStatusesQuery } from '../features/tasks/hooks/useStatusesQuery'
 import { useTaskStatusManager } from '../features/tasks/hooks/useTaskStatusManager'
 import { useDevelopersQuery } from '../features/tasks/hooks/useDevelopersQuery'
+import { useTaskAssigneeManager } from '../features/tasks/hooks/useTaskAssigneeManager'
 
 const formatSkills = (skills?: Skills[]) => {
   if (!skills || skills.length === 0) return 'N/A'
@@ -84,6 +85,10 @@ type TaskRowProps = {
   developersLoading: boolean
   getStatusValue: (task: Task) => string
   onStatusChange: (task: Task) => (event: ChangeEvent<HTMLSelectElement>) => void
+  getAssigneeValue: (task: Task) => string
+  onAssigneeChange: (task: Task) => (event: ChangeEvent<HTMLSelectElement>) => void
+  assigneePendingTaskId: string | null
+  assigneeIsUpdating: boolean
   disableStatus: boolean
 }
 
@@ -94,12 +99,17 @@ const TaskRow = ({
   developersLoading,
   getStatusValue,
   onStatusChange,
+  getAssigneeValue,
+  onAssigneeChange,
+  assigneePendingTaskId,
+  assigneeIsUpdating,
   disableStatus,
 }: TaskRowProps) => {
   const availableDevelopers = filterDevelopersBySkills(developers, task.skills)
   const currentStatusName = getStatusValue(task)
-  const currentAssigneeId = task.developer?.developerId ?? ''
-  const isAssigneeDisabled = developersLoading
+  const currentAssigneeId = getAssigneeValue(task)
+  const isAssigneeUpdatingThisTask = assigneePendingTaskId === task.taskId && assigneeIsUpdating
+  const isAssigneeDisabled = developersLoading || isAssigneeUpdatingThisTask
 
   return (
     <tr>
@@ -123,6 +133,7 @@ const TaskRow = ({
         <select
           className="form-select form-select-sm w-auto d-inline-block"
           value={currentAssigneeId}
+          onChange={onAssigneeChange(task)}
           disabled={isAssigneeDisabled}
         >
           {buildAssigneeOptions(availableDevelopers, task.developer)}
@@ -136,6 +147,13 @@ export const Homepage = () => {
   const { tasks, isLoading: isTasksLoading, error: tasksError } = useTasksQuery()
   const { statuses, isLoading: isStatusesLoading } = useStatusesQuery()
   const { developers, isLoading: isDevelopersLoading } = useDevelopersQuery()
+  const {
+    getAssigneeValue,
+    handleAssigneeChange,
+    pendingTaskId: pendingAssigneeTaskId,
+    isUpdating: isAssigneeUpdating,
+    error: assigneeUpdateError,
+  } = useTaskAssigneeManager(tasks)
 
   const {
     getStatusValue,
@@ -160,9 +178,9 @@ export const Homepage = () => {
           </div>
         )}
 
-        {statusUpdateError && (
+        {(statusUpdateError || assigneeUpdateError) && (
           <div className="alert alert-warning" role="alert">
-            {statusUpdateError}
+            {statusUpdateError || assigneeUpdateError}
           </div>
         )}
 
@@ -202,6 +220,10 @@ export const Homepage = () => {
                       developersLoading={isDevelopersLoading}
                       getStatusValue={getStatusValue}
                       onStatusChange={handleStatusChange}
+                      getAssigneeValue={getAssigneeValue}
+                      onAssigneeChange={handleAssigneeChange}
+                      assigneePendingTaskId={pendingAssigneeTaskId}
+                      assigneeIsUpdating={isAssigneeUpdating}
                       disableStatus={disableStatus}
                     />
                   )
