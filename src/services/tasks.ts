@@ -6,17 +6,18 @@ interface Developer {
   developerId: string;
 }
 
-interface Skills {
+export interface Skills {
   skillId: number;
   skillName: string;
 }
 
 export interface Task {
   developer?: Developer
-  skills: Skills
+  skills: Skills[];
   status: string;
   taskId: string;
-  title: string
+  title: string;
+  subtasks?: Task[];
 }
 
 const TASKS_ENDPOINT = '/tasks'

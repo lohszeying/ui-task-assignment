@@ -50,7 +50,6 @@ const request = async (
   path: string,
   options: RequestOptions = {},
 ) => {
-  console.log("method:", method, "baseUrl:", baseUrl, "path:", path)
   const { params, body, headers, signal } = options
 
   const response = await fetch(buildUrl(path, baseUrl, params), {
