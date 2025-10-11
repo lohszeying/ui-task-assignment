@@ -18,11 +18,11 @@ export interface Status {
 
 export interface Task {
   developer?: Developer
-  skills: Skills[];
-  status: Status;
-  taskId: string;
-  title: string;
-  subtasks?: Task[];
+  skills: Skills[]
+  status?: Status
+  taskId: string
+  title: string
+  subtasks?: Task[]
 }
 
 const TASKS_ENDPOINT = '/tasks'
@@ -37,6 +37,12 @@ class TaskService {
   public getAllTasks = async () => {
     const response = await httpClient.get(this.baseUrl, TASKS_ENDPOINT)
     return response.data as Task[]
+  }
+
+  public updateTaskStatus = async (taskId: string, statusId: string) => {
+    await httpClient.patch(this.baseUrl, `${TASKS_ENDPOINT}/${taskId}/status`, {
+      body: { statusId },
+    })
   }
 }
 
