@@ -70,8 +70,7 @@ export const Homepage = () => {
               <tbody>
                 {tasks.map((task) => {
                   const isUpdatingThisTask = pendingTaskId === task.taskId && isUpdating
-                  const disableStatus =
-                    !showStatusDropdown || isUpdatingThisTask || isStatusesLoading
+                  const statusDisabled = !showStatusDropdown || isUpdatingThisTask || isStatusesLoading
 
                   return (
                     <TaskRow
@@ -79,14 +78,18 @@ export const Homepage = () => {
                       task={task}
                       statuses={statuses}
                       developers={developers}
-                      developersLoading={isDevelopersLoading}
-                      getStatusValue={getStatusValue}
-                      onStatusChange={handleStatusChange}
-                      getAssigneeValue={getAssigneeValue}
-                      onAssigneeChange={handleAssigneeChange}
-                      assigneePendingTaskId={pendingAssigneeTaskId}
-                      assigneeIsUpdating={isAssigneeUpdating}
-                      disableStatus={disableStatus}
+                      statusControls={{
+                        valueFor: getStatusValue,
+                        onChange: handleStatusChange,
+                        disabled: statusDisabled,
+                      }}
+                      assigneeControls={{
+                        valueFor: getAssigneeValue,
+                        onChange: handleAssigneeChange,
+                        pendingTaskId: pendingAssigneeTaskId,
+                        isUpdating: isAssigneeUpdating,
+                        developersLoading: isDevelopersLoading,
+                      }}
                     />
                   )
                 })}

@@ -77,34 +77,33 @@ export type TaskRowProps = {
   task: Task
   statuses: Status[]
   developers: Developer[]
-  developersLoading: boolean
-  getStatusValue: (task: Task) => string
-  onStatusChange: (task: Task) => (event: ChangeEvent<HTMLSelectElement>) => void
-  getAssigneeValue: (task: Task) => string
-  onAssigneeChange: (task: Task) => (event: ChangeEvent<HTMLSelectElement>) => void
-  assigneePendingTaskId: string | null
-  assigneeIsUpdating: boolean
-  disableStatus: boolean
+  statusControls: {
+    valueFor: (task: Task) => string
+    onChange: (task: Task) => (event: ChangeEvent<HTMLSelectElement>) => void
+    disabled: boolean
+  }
+  assigneeControls: {
+    valueFor: (task: Task) => string
+    onChange: (task: Task) => (event: ChangeEvent<HTMLSelectElement>) => void
+    pendingTaskId: string | null
+    isUpdating: boolean
+    developersLoading: boolean
+  }
 }
 
 export const TaskRow = ({
   task,
   statuses,
   developers,
-  developersLoading,
-  getStatusValue,
-  onStatusChange,
-  getAssigneeValue,
-  onAssigneeChange,
-  assigneePendingTaskId,
-  assigneeIsUpdating,
-  disableStatus,
+  statusControls,
+  assigneeControls,
 }: TaskRowProps) => {
   const availableDevelopers = filterDevelopersBySkills(developers, task.skills)
-  const currentStatusName = getStatusValue(task)
-  const currentAssigneeId = getAssigneeValue(task)
-  const isAssigneeUpdatingThisTask = assigneePendingTaskId === task.taskId && assigneeIsUpdating
-  const isAssigneeDisabled = developersLoading || isAssigneeUpdatingThisTask
+  const currentStatusName = statusControls.valueFor(task)
+  const currentAssigneeId = assigneeControls.valueFor(task)
+  const isAssigneeUpdatingThisTask =
+    assigneeControls.pendingTaskId === task.taskId && assigneeControls.isUpdating
+  const isAssigneeDisabled = assigneeControls.developersLoading || isAssigneeUpdatingThisTask
 
   return (
     <tr>
@@ -118,8 +117,8 @@ export const TaskRow = ({
         <select
           className="form-select form-select-sm w-auto d-inline-block"
           value={currentStatusName}
-          onChange={onStatusChange(task)}
-          disabled={disableStatus}
+          onChange={statusControls.onChange(task)}
+          disabled={statusControls.disabled}
         >
           {buildStatusOptions(statuses, currentStatusName)}
         </select>
@@ -128,7 +127,7 @@ export const TaskRow = ({
         <select
           className="form-select form-select-sm w-auto d-inline-block"
           value={currentAssigneeId}
-          onChange={onAssigneeChange(task)}
+          onChange={assigneeControls.onChange(task)}
           disabled={isAssigneeDisabled}
         >
           {buildAssigneeOptions(availableDevelopers, task.developer)}
