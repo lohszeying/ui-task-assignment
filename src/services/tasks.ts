@@ -11,10 +11,15 @@ export interface Skills {
   skillName: string;
 }
 
+export interface Status {
+  statusId: number;
+  statusName: string;
+}
+
 export interface Task {
   developer?: Developer
   skills: Skills[];
-  status: string;
+  status: Status;
   taskId: string;
   title: string;
   subtasks?: Task[];

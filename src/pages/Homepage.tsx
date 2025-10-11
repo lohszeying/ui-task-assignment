@@ -1,12 +1,31 @@
 import { useQuery } from '@tanstack/react-query'
 import { taskService, type Skills } from '../services/tasks'
+import { statusService, type Status } from '../services/statuses'
 
-const formatSkills = (skills: Skills[]) => {
-  if (!skills) return 'N/A'
-
-  if (skills.length === 0) return 'N/A'
+const formatSkills = (skills?: Skills[]) => {
+  if (!skills || skills.length === 0) return 'N/A'
 
   return skills.map((skill) => skill.skillName).join(', ')
+}
+
+const buildStatusOptions = (statuses: Status[], currentStatusId?: number) => {
+  const hasCurrentStatus = currentStatusId
+    ? statuses.some((status) => status.statusId === currentStatusId)
+    : false
+
+  return (
+    <>
+      <option value="">Select status</option>
+      {!hasCurrentStatus && currentStatusId && (
+        <option value={currentStatusId}>{currentStatusId}</option>
+      )}
+      {statuses.map((status) => (
+        <option key={status.statusId} value={status.statusName}>
+          {status.statusName}
+        </option>
+      ))}
+    </>
+  )
 }
 
 export const Homepage = () => {
@@ -14,6 +33,15 @@ export const Homepage = () => {
     queryKey: ['tasks'],
     queryFn: () => taskService.getAllTasks(),
   })
+
+  const { data: statuses } = useQuery({
+    queryKey: ['statuses'],
+    queryFn: () => statusService.getAllStatuses(),
+    staleTime: 1000 * 60 * 5,
+  })
+
+  const taskList = tasks ?? []
+  const statusList = statuses ?? []
 
   return (
     <section className="card shadow-sm border-0">
@@ -28,11 +56,11 @@ export const Homepage = () => {
           </div>
         )}
 
-        {!isPending && !error && tasks.length === 0 && (
+        {!isPending && !error && taskList.length === 0 && (
           <p className="text-muted mb-0">No tasks available yet.</p>
         )}
 
-        {!isPending && !error && tasks.length > 0 && (
+        {!isPending && !error && taskList.length > 0 && (
           <div className="table-responsive">
             <table className="table align-middle">
               <thead>
@@ -50,7 +78,7 @@ export const Homepage = () => {
                 </tr>
               </thead>
               <tbody>
-                {tasks.map((task) => (
+                {taskList.map((task) => (
                   <tr key={task.taskId}>
                     <td>
                       <div className="fw-semibold">{task.title}</div>
@@ -61,12 +89,9 @@ export const Homepage = () => {
                     <td className="text-center">
                       <select
                         className="form-select form-select-sm w-auto d-inline-block"
-                        defaultValue={task.status ?? ''}
+                        defaultValue={task.status.statusName ?? ''}
                       >
-                        <option value="">Select status</option>
-                        <option value="todo">To-do</option>
-                        <option value="in_progress">In progress</option>
-                        <option value="done">Done</option>
+                        {buildStatusOptions(statusList, task.status.statusId)}
                       </select>
                     </td>
                     <td className="text-center">
