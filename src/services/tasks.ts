@@ -16,6 +16,17 @@ export interface Status {
   statusName: string;
 }
 
+export interface SubtaskPayload {
+  title: string;
+  skills?: number[];
+  subtasks?: SubtaskPayload[];
+}
+
+export interface CreateTaskPayload extends SubtaskPayload {
+  parentTaskId?: string | null;
+  subtasks?: SubtaskPayload[];
+}
+
 export interface Task {
   developer?: Developer
   skills: Skills[]
@@ -53,6 +64,14 @@ class TaskService {
 
   public unassignTaskDeveloper = async (taskId: string) => {
     await httpClient.delete(this.baseUrl, `${TASKS_ENDPOINT}/${taskId}/developer`)
+  }
+
+  public createTask = async (payload: CreateTaskPayload) => {
+    const response = await httpClient.post(this.baseUrl, TASKS_ENDPOINT, {
+      body: payload,
+    })
+
+    return response.data
   }
 }
 

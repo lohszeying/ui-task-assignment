@@ -2,6 +2,8 @@ import { useForm } from '@tanstack/react-form'
 import type { AnyFieldApi } from '@tanstack/react-form'
 import { useSkillsQuery } from '../features/skills/hooks/useSkillsQuery'
 import { SkillPill } from '../components/SkillPill'
+import { useCreateTaskMutation } from '../features/tasks/hooks/useCreateTaskMutation'
+import type { CreateTaskPayload } from '../services/tasks'
 import './CreateTaskPage.css'
 
 type CreateTaskFormValues = {
@@ -33,14 +35,36 @@ export const CreateTaskPage = () => {
         ? 'Unable to load skills. Please try again later.'
         : null
 
+  const createTaskMutation = useCreateTaskMutation()
+  const submissionErrorMessage =
+    createTaskMutation.error instanceof Error
+      ? createTaskMutation.error.message
+      : createTaskMutation.error
+        ? 'Failed to create task.'
+        : null
+
   const form = useForm({
     defaultValues: {
       title: '',
       skills: [] as number[],
     } satisfies CreateTaskFormValues,
-    onSubmit: async ({ value }) => {
-      // Do something with form data
-      console.log(value)
+    onSubmit: async ({ value, formApi }) => {
+      createTaskMutation.reset()
+
+      const payload: CreateTaskPayload = {
+        title: value.title.trim(),
+      }
+
+      if (value.skills.length > 0) {
+        payload.skills = value.skills
+      }
+
+      try {
+        await createTaskMutation.mutateAsync(payload)
+        formApi.reset()
+      } catch (error) {
+        console.error('Failed to create task', error)
+      }
     },
   })
 
@@ -141,9 +165,24 @@ export const CreateTaskPage = () => {
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
           children={([canSubmit, isSubmitting]) => (
-            <button type="submit" disabled={!canSubmit}>
-              {isSubmitting ? '...' : 'Submit'}
-            </button>
+            <>
+              <button
+                type="submit"
+                disabled={!canSubmit || isSubmitting || createTaskMutation.isPending}
+              >
+                {isSubmitting || createTaskMutation.isPending ? '...' : 'Submit'}
+              </button>
+              {submissionErrorMessage ? (
+                <p role="alert" className="mt-2 text-danger">
+                  {submissionErrorMessage}
+                </p>
+              ) : null}
+              {createTaskMutation.isSuccess ? (
+                <p role="status" className="mt-2 text-success">
+                  Task created successfully.
+                </p>
+              ) : null}
+            </>
           )}
         />
       </form>
