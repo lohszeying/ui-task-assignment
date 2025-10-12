@@ -1,8 +1,8 @@
-import { Fragment, type JSX } from 'react'
+import { type JSX } from 'react'
 import type { AnyFieldApi } from '@tanstack/react-form'
-import { SkillPill } from '../../../../components/SkillPill'
-import type { Skill } from '../../../../services/skills'
-import { createEmptyTaskFormValues, MAX_SUBTASK_DEPTH, type TaskFormValues } from '../../utils/taskFormHelpers'
+import { SkillPill } from '../SkillPill'
+import type { Skill } from '../../services/skills'
+import { createEmptyTaskFormValues, MAX_SUBTASK_DEPTH, type TaskFormValues } from '../../features/tasks/utils/taskFormHelpers'
 import './TaskFormSection.css'
 
 type TaskFieldPath = string
@@ -40,14 +40,27 @@ const buildArrayFieldPath = (base: TaskFieldPath | null): TaskArrayFieldPath =>
 const buildSubtaskBasePath = (arrayPath: TaskArrayFieldPath, index: number): TaskFieldPath =>
   `${arrayPath}.${index}`
 
-const FieldInfo = ({ field }: { field: AnyFieldApi }) => (
-  <>
-    {field.state.meta.isTouched && !field.state.meta.isValid ? (
-      <em>{field.state.meta.errors.join(', ')}</em>
-    ) : null}
-    {field.state.meta.isValidating ? 'Validating...' : null}
-  </>
-)
+const FieldInfo = ({ field }: { field: AnyFieldApi }) => {
+  const showError = field.state.meta.isTouched && !field.state.meta.isValid
+  const showValidating = field.state.meta.isValidating
+
+  if (!showError && !showValidating) {
+    return null
+  }
+
+  return (
+    <div className="task-field__messages">
+      {showError ? (
+        <p className="task-field__message task-field__message--error">
+          {field.state.meta.errors.join(', ')}
+        </p>
+      ) : null}
+      {showValidating ? (
+        <p className="task-field__message task-field__message--hint">Validating...</p>
+      ) : null}
+    </div>
+  )
+}
 
 export const TaskFormSection = ({
   form,
@@ -61,10 +74,14 @@ export const TaskFormSection = ({
   const skillsFieldPath = buildFieldPath(fieldPath, 'skills')
   const subtasksFieldPath = buildArrayFieldPath(fieldPath)
 
-  const sectionStyle = depth > 0 ? { marginLeft: depth * 20 } : undefined
+  const sectionClassName =
+    'task-form-section ' +
+    (depth > 0 ? 'task-form-section--nested' : 'task-form-section--root') +
+    (depth > 0 ? ` task-form-section--depth-${Math.min(depth, MAX_SUBTASK_DEPTH)}` : '')
+  const isDepthLimitReached = depth >= MAX_SUBTASK_DEPTH
 
   return (
-    <div className="task-form-section" style={sectionStyle}>
+    <div className={sectionClassName}>
       {fieldPath ? (
         <button
           type="button"
@@ -95,17 +112,22 @@ export const TaskFormSection = ({
           const inputId = field.name.replace(/\./g, '-')
 
           return (
-            <>
-              <label htmlFor={inputId}>Task title: </label>
+            <div className="task-field">
+              <label htmlFor={inputId} className="task-field__label">
+                Task title
+              </label>
               <input
                 id={inputId}
                 name={field.name}
                 value={field.state.value}
                 onBlur={field.handleBlur}
+                type="text"
+                className="task-field__input"
+                placeholder="Write a clear, concise title"
                 onChange={(e) => field.handleChange(e.target.value)}
               />
               <FieldInfo field={field} />
-            </>
+            </div>
           )
         }}
       />
@@ -123,29 +145,43 @@ export const TaskFormSection = ({
               ? selectedSkills.filter((id) => id !== skillId)
               : [...selectedSkills, skillId]
             field.handleChange(updated)
+            field.handleBlur()
           }
 
           return (
-            <>
-              <span id={groupId}>Skills:</span>
-              {isLoadingSkills ? <p>Loading skills...</p> : null}
-              {skillsErrorMessage ? <p role="alert">{skillsErrorMessage}</p> : null}
-              {!isLoadingSkills && !skillsErrorMessage && availableSkills.length === 0 ? (
-                <p>No skills available.</p>
+            <div className="task-field task-field--skills">
+              <span className="task-field__label" id={groupId}>
+                Skills
+              </span>
+              <p className="task-field__helper">Select every skill that helps complete this task.</p>
+
+              {isLoadingSkills ? (
+                <p className="task-field__message task-field__message--muted">Loading skills...</p>
               ) : null}
+              {skillsErrorMessage ? (
+                <p role="alert" className="task-field__message task-field__message--error">
+                  {skillsErrorMessage}
+                </p>
+              ) : null}
+              {!isLoadingSkills && !skillsErrorMessage && availableSkills.length === 0 ? (
+                <p className="task-field__message task-field__message--muted">No skills available right now.</p>
+              ) : null}
+
               <div className="skill-pill-list" role="group" aria-labelledby={groupId}>
-                {availableSkills.map((skill) => (
-                  <SkillPill
-                    key={`${skillsFieldPath}-${skill.skillId}`}
-                    label={skill.skillName}
-                    isSelected={selectedSkills.includes(skill.skillId)}
-                    onClick={() => toggleSkill(skill.skillId)}
-                    onBlur={field.handleBlur}
-                  />
-                ))}
+                {availableSkills.map((skill) => {
+                  const isSelected = selectedSkills.includes(skill.skillId)
+                  return (
+                    <SkillPill
+                      key={`${skillsFieldPath}-${skill.skillId}`}
+                      label={skill.skillName}
+                      isSelected={isSelected}
+                      onClick={() => toggleSkill(skill.skillId)}
+                    />
+                  )
+                })}
               </div>
               <FieldInfo field={field} />
-            </>
+            </div>
           )
         }}
       />
@@ -156,7 +192,6 @@ export const TaskFormSection = ({
           const subtasks: TaskFormValues[] = Array.isArray(field.state.value)
             ? field.state.value
             : []
-          const isDepthLimitReached = depth >= MAX_SUBTASK_DEPTH
 
           const handleAddSubtask = () => {
             if (isDepthLimitReached) return
@@ -165,33 +200,37 @@ export const TaskFormSection = ({
 
           return (
             <div className="task-subtasks">
-              <button
-                type="button"
-                onClick={handleAddSubtask}
-                className="btn btn-outline-primary"
-                disabled={isDepthLimitReached}
-              >
-                Add subtask
-              </button>
+              <div className="task-subtasks__header">
+                <p className="task-subtasks__title">Subtasks</p>
+                <button
+                  type="button"
+                  onClick={handleAddSubtask}
+                  className="task-subtasks__add"
+                  disabled={isDepthLimitReached}
+                >
+                  Add subtask
+                </button>
+              </div>
+
               {isDepthLimitReached ? (
-                <p className="task-subtasks__limit" role="status">
+                <p className="task-field__message task-field__message--muted" role="status">
                   Maximum depth of {MAX_SUBTASK_DEPTH} reached.
                 </p>
               ) : null}
-                <div className="task-subtask-list">
-                  {subtasks.map((_, index) => {
-                    const childPath = buildSubtaskBasePath(subtasksFieldPath, index)
-                    return (
-                      <Fragment key={childPath}>
-                        <TaskFormSection
-                          form={form}
-                          fieldPath={childPath}
-                          depth={depth + 1}
-                          availableSkills={availableSkills}
-                          isLoadingSkills={isLoadingSkills}
-                          skillsErrorMessage={skillsErrorMessage}
-                      />
-                    </Fragment>
+
+              <div className="task-subtasks__list">
+                {subtasks.map((_, index) => {
+                  const childPath = buildSubtaskBasePath(subtasksFieldPath, index)
+                  return (
+                    <TaskFormSection
+                      key={childPath}
+                      form={form}
+                      fieldPath={childPath}
+                      depth={depth + 1}
+                      availableSkills={availableSkills}
+                      isLoadingSkills={isLoadingSkills}
+                      skillsErrorMessage={skillsErrorMessage}
+                    />
                   )
                 })}
               </div>

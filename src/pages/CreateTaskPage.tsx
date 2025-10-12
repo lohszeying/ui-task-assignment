@@ -1,5 +1,5 @@
 import { useForm } from '@tanstack/react-form'
-import { TaskFormSection } from '../features/tasks/components/TaskFormSection/TaskFormSection'
+import { TaskFormSection } from '../components/TaskFormSection/TaskFormSection'
 import {
   createEmptyTaskFormValues,
   toCreateTaskPayload,
@@ -7,6 +7,7 @@ import {
 } from '../features/tasks/utils/taskFormHelpers'
 import { useCreateTaskMutation } from '../features/tasks/hooks/useCreateTaskMutation'
 import { useSkillsQuery } from '../features/skills/hooks/useSkillsQuery'
+import './CreateTaskPage.css'
 
 export const CreateTaskPage = () => {
   const {
@@ -46,47 +47,62 @@ export const CreateTaskPage = () => {
   })
 
   return (
-    <section>
-      <h1 className="h3 mb-3">Create Task</h1>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          form.handleSubmit()
-        }}
-      >
-        <TaskFormSection
-          form={form as any}
-          fieldPath={null}
-          depth={0}
-          availableSkills={availableSkills}
-          isLoadingSkills={isLoadingSkills}
-          skillsErrorMessage={skillsErrorMessage}
-        />
-        <form.Subscribe
-          selector={(state) => [state.canSubmit, state.isSubmitting]}
-          children={([canSubmit, isSubmitting]) => (
-            <>
-              <button
-                type="submit"
-                disabled={!canSubmit || isSubmitting || createTaskMutation.isPending}
-              >
-                {isSubmitting || createTaskMutation.isPending ? '...' : 'Submit'}
-              </button>
-              {submissionErrorMessage ? (
-                <p role="alert" className="mt-2 text-danger">
-                  {submissionErrorMessage}
-                </p>
-              ) : null}
-              {createTaskMutation.isSuccess ? (
-                <p role="status" className="mt-2 text-success">
-                  Task created successfully.
-                </p>
-              ) : null}
-            </>
-          )}
-        />
-      </form>
+    <section className="create-task-page">
+      <div className="create-task-card">
+        <header className="create-task-card__header">
+          <h1 className="create-task-card__title">Create Task</h1>
+          <p className="create-task-card__subtitle">
+            Fill out the task details, assign the right skills, and add subtasks if needed.
+          </p>
+        </header>
+        <form
+          className="create-task-form"
+          onSubmit={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            form.handleSubmit()
+          }}
+        >
+          <div className="create-task-form__body">
+            <TaskFormSection
+              form={form as any}
+              fieldPath={null}
+              depth={0}
+              availableSkills={availableSkills}
+              isLoadingSkills={isLoadingSkills}
+              skillsErrorMessage={skillsErrorMessage}
+            />
+          </div>
+          <form.Subscribe
+            selector={(state) => [state.canSubmit, state.isSubmitting]}
+            children={([canSubmit, isSubmitting]) => {
+              const isBusy = isSubmitting || createTaskMutation.isPending
+
+              return (
+                <div className="create-task-form__footer">
+                  <button
+                    type="submit"
+                    className="create-task-submit"
+                    disabled={!canSubmit || isBusy}
+                  >
+                    {isBusy ? 'Submitting...' : 'Create task'}
+                  </button>
+                  {submissionErrorMessage ? (
+                    <p role="alert" className="create-task-status create-task-status--error">
+                      {submissionErrorMessage}
+                    </p>
+                  ) : null}
+                  {createTaskMutation.isSuccess ? (
+                    <p role="status" className="create-task-status create-task-status--success">
+                      Task created successfully.
+                    </p>
+                  ) : null}
+                </div>
+              )
+            }}
+          />
+        </form>
+      </div>
     </section>
   )
 }

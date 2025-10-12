@@ -3,7 +3,7 @@ import { useStatusesQuery } from '../features/tasks/hooks/useStatusesQuery'
 import { useTaskStatusManager } from '../features/tasks/hooks/useTaskStatusManager'
 import { useDevelopersQuery } from '../features/tasks/hooks/useDevelopersQuery'
 import { useTaskAssigneeManager } from '../features/tasks/hooks/useTaskAssigneeManager'
-import { TaskRow } from '../features/tasks/components/TaskRow'
+import { TaskRow } from '../components/TaskRow'
 
 export const Homepage = () => {
   const { tasks, isLoading: isTasksLoading, error: tasksError } = useTasksQuery()
