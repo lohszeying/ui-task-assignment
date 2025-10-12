@@ -1,0 +1,14 @@
+services:
+  web:
+    build:
+      context: .
+      target: dev
+      args:
+        NODE_VERSION: 24
+    ports:
+      - "5173:5173"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - .:/app
+      - /app/node_modules
