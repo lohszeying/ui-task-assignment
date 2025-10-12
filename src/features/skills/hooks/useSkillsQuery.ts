@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { skillsService } from '../../../services/skills'
-import type { Skill } from '../../../services/skills'
+import type { Skill } from '../../../types/tasks'
 
 export const useSkillsQuery = () => {
   const query = useQuery({

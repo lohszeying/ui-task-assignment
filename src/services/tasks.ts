@@ -1,40 +1,6 @@
 import { appConfig } from '../config/appConfig'
 import { httpClient } from '../lib/httpClient'
-
-interface Developer {
-  developerName: string;
-  developerId: string;
-}
-
-export interface Skills {
-  skillId: number;
-  skillName: string;
-}
-
-export interface Status {
-  statusId: number;
-  statusName: string;
-}
-
-export interface SubtaskPayload {
-  title: string;
-  skills?: number[];
-  subtasks?: SubtaskPayload[];
-}
-
-export interface CreateTaskPayload extends SubtaskPayload {
-  parentTaskId?: string | null;
-  subtasks?: SubtaskPayload[];
-}
-
-export interface Task {
-  developer?: Developer
-  skills: Skills[]
-  status?: Status
-  taskId: string
-  title: string
-  subtasks?: Task[]
-}
+import type { CreateTaskPayload, Task } from '../types/tasks'
 
 const TASKS_ENDPOINT = '/tasks'
 

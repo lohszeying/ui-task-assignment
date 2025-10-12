@@ -1,8 +1,12 @@
 import { type JSX } from 'react'
 import type { AnyFieldApi } from '@tanstack/react-form'
 import { SkillPill } from './SkillPill'
-import type { Skill } from '../services/skills'
-import { createEmptyTaskFormValues, MAX_SUBTASK_DEPTH, type TaskFormValues } from '../features/tasks/utils/taskFormHelpers'
+import type { Skill } from '../../../types/tasks'
+import {
+  createEmptyTaskFormValues,
+  MAX_SUBTASK_DEPTH,
+  type TaskFormValues,
+} from '../utils/taskFormHelpers'
 import './TaskFormSection.css'
 
 type TaskFieldPath = string
@@ -70,7 +74,7 @@ export const TaskFormSection = ({
   availableSkills,
   isLoadingSkills,
   skillsErrorMessage,
-  isDisabled
+  isDisabled,
 }: TaskFormSectionProps) => {
   const descriptionFieldPath = buildFieldPath(fieldPath, 'title')
   const skillsFieldPath = buildFieldPath(fieldPath, 'skills')
@@ -110,7 +114,7 @@ export const TaskFormSection = ({
           onChangeAsync: async ({ value }) => {
             await new Promise((resolve) => setTimeout(resolve, 1000))
             return value.includes('error') ? 'No "error" allowed in description' : undefined
-          }
+          },
         }}
         children={(field) => {
           const inputId = field.name.replace(/\./g, '-')
@@ -170,7 +174,9 @@ export const TaskFormSection = ({
                 </p>
               ) : null}
               {!isLoadingSkills && !skillsErrorMessage && availableSkills.length === 0 ? (
-                <p className="task-field__message task-field__message--muted">No skills available right now.</p>
+                <p className="task-field__message task-field__message--muted">
+                  No skills available right now.
+                </p>
               ) : null}
 
               <div className="skill-pill-list" role="group" aria-labelledby={groupId}>

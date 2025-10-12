@@ -1,7 +1,7 @@
 import { type ChangeEvent, useEffect, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { taskService, type Task } from '../../../services/tasks'
-import type { Status } from '../../../services/statuses'
+import { taskService } from '../../../services/tasks'
+import type { Task, Status } from '../../../types/tasks'
 
 const extractStatusName = (status?: Status) => status?.statusName ?? ''
 

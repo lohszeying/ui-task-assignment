@@ -1,10 +1,6 @@
 import { appConfig } from '../config/appConfig'
 import { httpClient } from '../lib/httpClient'
-
-export interface Status {
-  statusId: number
-  statusName: string
-}
+import type { Status } from '../types/tasks'
 
 const STATUSES_ENDPOINT = '/statuses'
 

@@ -1,12 +1,6 @@
 import { appConfig } from '../config/appConfig'
 import { httpClient } from '../lib/httpClient'
-import type { Skills } from './tasks'
-
-export interface Developer {
-  developerId: string
-  developerName: string
-  skills?: Skills[]
-}
+import type { Developer } from '../types/tasks'
 
 const DEVELOPERS_ENDPOINT = '/developers'
 

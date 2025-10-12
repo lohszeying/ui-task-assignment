@@ -1,6 +1,7 @@
 import { type ChangeEvent, useEffect, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { taskService, type Task } from '../../../services/tasks'
+import { taskService } from '../../../services/tasks'
+import type { Task } from '../../../types/tasks'
 
 export const useTaskAssigneeManager = (tasks: Task[] | undefined) => {
   const [selectedAssignees, setSelectedAssignees] = useState<Record<string, string>>({})

@@ -1,4 +1,4 @@
-import type { CreateTaskPayload, SubtaskPayload } from '../../../services/tasks'
+import type { CreateTaskPayload, SubtaskPayload } from '../../../types/tasks'
 
 export interface TaskFormValues {
   title: string

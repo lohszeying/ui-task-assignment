@@ -1,10 +1,8 @@
 import type { ChangeEvent } from 'react'
-import { type Task, type Skills } from '../services/tasks'
-import { type Status } from '../services/statuses'
-import { type Developer } from '../services/developers'
+import type { Task, Skill, Status, Developer } from '../../../types/tasks'
 import './TaskRow.css'
 
-const formatSkills = (skills?: Skills[]) => {
+const formatSkills = (skills?: Skill[]) => {
   if (!skills || skills.length === 0) return 'N/A'
 
   return skills.map((skill) => skill.skillName).join(', ')
@@ -30,7 +28,7 @@ const buildStatusOptions = (statuses: Status[], currentStatusName: string) => {
   )
 }
 
-const filterDevelopersBySkills = (developers: Developer[], skills?: Skills[]) => {
+const filterDevelopersBySkills = (developers: Developer[], skills?: Skill[]) => {
   if (!skills || skills.length === 0) {
     return developers
   }

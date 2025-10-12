@@ -1,10 +1,6 @@
 import { appConfig } from '../config/appConfig'
 import { httpClient } from '../lib/httpClient'
-
-export interface Skill {
-  skillId: number
-  skillName: string
-}
+import type { Skill } from '../types/tasks'
 
 const SKILLS_ENDPOINT = '/skills'
 
