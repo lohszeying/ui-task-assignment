@@ -111,6 +111,16 @@ export const CreateTaskPage = () => {
 
     return (
       <div className="task-form-section" style={sectionStyle}>
+        {fieldPath ? (
+          <button
+            type="button"
+            className="task-remove-button"
+            aria-label="Remove subtask"
+            onClick={() => form.deleteField(fieldPath)}
+          >
+            ×
+          </button>
+        ) : null}
         <form.Field
           name={titleFieldPath}
           validators={{

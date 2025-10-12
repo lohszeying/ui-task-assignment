@@ -4,6 +4,7 @@
   background-color: #ffffff;
   padding: 1rem;
   margin-top: 1rem;
+  position: relative;
 }
 
 .task-subtasks {
@@ -21,6 +22,23 @@
   font-size: 0.875rem;
   color: #6b7280;
   margin: 0;
+}
+
+.task-remove-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.task-remove-button:hover,
+.task-remove-button:focus {
+  color: #dc2626;
 }
 
 .task-subtask-list {
