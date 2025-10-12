@@ -63,41 +63,44 @@ export const CreateTaskPage = () => {
             form.handleSubmit()
           }}
         >
-          <div className="create-task-form__body">
-            <TaskFormSection
-              form={form as any}
-              fieldPath={null}
-              depth={0}
-              availableSkills={availableSkills}
-              isLoadingSkills={isLoadingSkills}
-              skillsErrorMessage={skillsErrorMessage}
-            />
-          </div>
           <form.Subscribe
             selector={(state) => [state.canSubmit, state.isSubmitting]}
             children={([canSubmit, isSubmitting]) => {
               const isBusy = isSubmitting || createTaskMutation.isPending
 
               return (
-                <div className="create-task-form__footer">
-                  <button
-                    type="submit"
-                    className="create-task-submit"
-                    disabled={!canSubmit || isBusy}
-                  >
-                    {isBusy ? 'Submitting...' : 'Create task'}
-                  </button>
-                  {submissionErrorMessage ? (
-                    <p role="alert" className="create-task-status create-task-status--error">
-                      {submissionErrorMessage}
-                    </p>
-                  ) : null}
-                  {createTaskMutation.isSuccess ? (
-                    <p role="status" className="create-task-status create-task-status--success">
-                      Task created successfully.
-                    </p>
-                  ) : null}
-                </div>
+                <>
+                  <div className="create-task-form__body" aria-busy={isBusy} aria-disabled={isBusy}>
+                    <TaskFormSection
+                      form={form as any}
+                      fieldPath={null}
+                      depth={0}
+                      availableSkills={availableSkills}
+                      isLoadingSkills={isLoadingSkills}
+                      skillsErrorMessage={skillsErrorMessage}
+                      isDisabled={isBusy}
+                    />
+                  </div>
+                  <div className="create-task-form__footer">
+                    <button
+                      type="submit"
+                      className="create-task-submit"
+                      disabled={!canSubmit || isBusy}
+                    >
+                      {isBusy ? 'Submitting...' : 'Create task'}
+                    </button>
+                    {submissionErrorMessage ? (
+                      <p role="alert" className="create-task-status create-task-status--error">
+                        {submissionErrorMessage}
+                      </p>
+                    ) : null}
+                    {createTaskMutation.isSuccess ? (
+                      <p role="status" className="create-task-status create-task-status--success">
+                        Task created successfully.
+                      </p>
+                    ) : null}
+                  </div>
+                </>
               )
             }}
           />

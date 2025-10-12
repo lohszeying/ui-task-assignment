@@ -17,6 +17,10 @@
   box-shadow: none;
 }
 
+.task-form-section--disabled {
+  opacity: 0.95;
+}
+
 .task-form-section--depth-1 {
   margin-left: 1.5rem;
 }
@@ -61,10 +65,21 @@
   outline-offset: 3px;
 }
 
+.task-remove-button:disabled {
+  background-color: rgba(239, 68, 68, 0.08);
+  color: #fca5a5;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .task-field {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.task-field--disabled .task-field__label {
+  color: #9ca3af;
 }
 
 .task-field__label {
@@ -107,6 +122,17 @@
   padding: 0.75rem 0.95rem;
 }
 
+.task-field--disabled .task-field__control {
+  background-color: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+}
+
+.task-field--disabled .task-field__control:focus-visible {
+  border-color: #e5e7eb;
+  box-shadow: none;
+}
+
 .task-field__messages {
   display: flex;
   flex-direction: column;
@@ -129,6 +155,10 @@
 
 .task-field__message--muted {
   color: #6b7280;
+}
+
+.task-field--disabled .task-field__message {
+  color: #9ca3af;
 }
 
 .skill-pill-list {

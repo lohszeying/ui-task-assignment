@@ -27,6 +27,7 @@ export interface TaskFormSectionProps {
   availableSkills: Skill[]
   isLoadingSkills: boolean
   skillsErrorMessage: string | null
+  isDisabled: boolean
 }
 
 const buildFieldPath = (base: TaskFieldPath | null, key: keyof TaskFormValues): TaskFieldPath => {
@@ -68,7 +69,8 @@ export const TaskFormSection = ({
   depth,
   availableSkills,
   isLoadingSkills,
-  skillsErrorMessage
+  skillsErrorMessage,
+  isDisabled
 }: TaskFormSectionProps) => {
   const descriptionFieldPath = buildFieldPath(fieldPath, 'title')
   const skillsFieldPath = buildFieldPath(fieldPath, 'skills')
@@ -77,7 +79,8 @@ export const TaskFormSection = ({
   const sectionClassName =
     'task-form-section ' +
     (depth > 0 ? 'task-form-section--nested' : 'task-form-section--root') +
-    (depth > 0 ? ` task-form-section--depth-${Math.min(depth, MAX_SUBTASK_DEPTH)}` : '')
+    (depth > 0 ? ` task-form-section--depth-${Math.min(depth, MAX_SUBTASK_DEPTH)}` : '') +
+    (isDisabled ? ' task-form-section--disabled' : '')
   const isDepthLimitReached = depth >= MAX_SUBTASK_DEPTH
 
   return (
@@ -88,6 +91,7 @@ export const TaskFormSection = ({
           className="task-remove-button"
           aria-label="Remove subtask"
           onClick={() => form.deleteField(fieldPath)}
+          disabled={isDisabled}
         >
           ×
         </button>
@@ -112,7 +116,7 @@ export const TaskFormSection = ({
           const inputId = field.name.replace(/\./g, '-')
 
           return (
-            <div className="task-field">
+            <div className={`task-field${isDisabled ? ' task-field--disabled' : ''}`}>
               <label htmlFor={inputId} className="task-field__label">
                 Task description
               </label>
@@ -124,6 +128,7 @@ export const TaskFormSection = ({
                 className="task-field__control task-field__control--textarea"
                 placeholder="Describe what needs to get done..."
                 rows={4}
+                disabled={isDisabled}
                 onChange={(e) => field.handleChange(e.target.value)}
               />
               <FieldInfo field={field} />
@@ -141,6 +146,7 @@ export const TaskFormSection = ({
           const groupId = `${field.name.replace(/\./g, '-')}-pill-group`
 
           const toggleSkill = (skillId: number) => {
+            if (isDisabled) return
             const updated = selectedSkills.includes(skillId)
               ? selectedSkills.filter((id) => id !== skillId)
               : [...selectedSkills, skillId]
@@ -149,7 +155,7 @@ export const TaskFormSection = ({
           }
 
           return (
-            <div className="task-field task-field--skills">
+            <div className={`task-field task-field--skills${isDisabled ? ' task-field--disabled' : ''}`}>
               <span className="task-field__label" id={groupId}>
                 Skills
               </span>
@@ -176,6 +182,7 @@ export const TaskFormSection = ({
                       label={skill.skillName}
                       isSelected={isSelected}
                       onClick={() => toggleSkill(skill.skillId)}
+                      disabled={isDisabled}
                     />
                   )
                 })}
@@ -194,7 +201,7 @@ export const TaskFormSection = ({
             : []
 
           const handleAddSubtask = () => {
-            if (isDepthLimitReached) return
+            if (isDepthLimitReached || isDisabled) return
             form.pushFieldValue(subtasksFieldPath, createEmptyTaskFormValues())
           }
 
@@ -206,7 +213,7 @@ export const TaskFormSection = ({
                   type="button"
                   onClick={handleAddSubtask}
                   className="task-subtasks__add"
-                  disabled={isDepthLimitReached}
+                  disabled={isDepthLimitReached || isDisabled}
                 >
                   Add subtask
                 </button>
@@ -230,6 +237,7 @@ export const TaskFormSection = ({
                       availableSkills={availableSkills}
                       isLoadingSkills={isLoadingSkills}
                       skillsErrorMessage={skillsErrorMessage}
+                      isDisabled={isDisabled}
                     />
                   )
                 })}
