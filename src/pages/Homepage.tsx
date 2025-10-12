@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+import { toast } from 'react-toastify'
 import { useTasksQuery } from '../features/tasks/hooks/useTasksQuery'
 import { useStatusesQuery } from '../features/tasks/hooks/useStatusesQuery'
 import { useTaskStatusManager } from '../features/tasks/hooks/useTaskStatusManager'
@@ -26,16 +28,28 @@ export const Homepage = () => {
     error: statusUpdateError,
   } = useTaskStatusManager(tasks, statuses)
 
-  const showStatusDropdown = statuses.length > 0
-  const hasTasks = tasks.length > 0
-  const isLoadingTasks = isTasksLoading
-
   const normalizeError = (value: unknown) =>
     value instanceof Error ? value.message : typeof value === 'string' ? value : null
 
   const tasksErrorMessage = normalizeError(tasksError)
-  const statusUpdateMessage = normalizeError(statusUpdateError) ?? normalizeError(assigneeUpdateError)
-  const totalDevelopers = developers.length
+  const statusUpdateErrorMessage = normalizeError(statusUpdateError)
+  const assigneeUpdateErrorMessage = normalizeError(assigneeUpdateError)
+
+  useEffect(() => {
+    if (statusUpdateErrorMessage) {
+      toast.error(statusUpdateErrorMessage)
+    }
+  }, [statusUpdateErrorMessage])
+
+  useEffect(() => {
+    if (assigneeUpdateErrorMessage) {
+      toast.error(assigneeUpdateErrorMessage)
+    }
+  }, [assigneeUpdateErrorMessage])
+
+  const showStatusDropdown = statuses.length > 0
+  const hasTasks = tasks.length > 0
+  const isLoadingTasks = isTasksLoading
 
   const renderLoadingState = () => (
     <p className="tasks-panel__message tasks-panel__message--muted">Loading tasks...</p>
@@ -55,13 +69,6 @@ export const Homepage = () => {
       </p>
     </div>
   )
-
-  const renderStatusMessage = () =>
-    statusUpdateMessage ? (
-      <div className="tasks-panel__message tasks-panel__message--warning" role="alert">
-        {statusUpdateMessage}
-      </div>
-    ) : null
 
   const renderTaskList = () => (
     <div className="tasks-list">
@@ -103,7 +110,6 @@ export const Homepage = () => {
         </header>
 
         <div className="tasks-panel__content">
-          {renderStatusMessage()}
           {isLoadingTasks && renderLoadingState()}
           {!isLoadingTasks && tasksErrorMessage && renderErrorState()}
           {!isLoadingTasks && !tasksErrorMessage && !hasTasks && renderEmptyState()}

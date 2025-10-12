@@ -1,4 +1,6 @@
 import { Link, Outlet } from '@tanstack/react-router'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import './App.css'
 
 const App = () => {
@@ -41,6 +43,7 @@ const App = () => {
           <Outlet />
         </div>
       </main>
+      <ToastContainer position="top-right" autoClose={3000} newestOnTop pauseOnFocusLoss />
     </div>
   )
 }

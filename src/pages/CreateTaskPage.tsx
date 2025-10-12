@@ -1,4 +1,6 @@
+import { useEffect } from 'react'
 import { useForm } from '@tanstack/react-form'
+import { toast } from 'react-toastify'
 import { TaskFormSection } from '../components/TaskFormSection'
 import {
   createEmptyTaskFormValues,
@@ -46,6 +48,12 @@ export const CreateTaskPage = () => {
     },
   })
 
+  useEffect(() => {
+    if (submissionErrorMessage) {
+      toast.error(submissionErrorMessage)
+    }
+  }, [submissionErrorMessage])
+
   return (
     <section className="create-task-page">
       <div className="create-task-card">
@@ -89,11 +97,6 @@ export const CreateTaskPage = () => {
                     >
                       {isBusy ? 'Submitting...' : 'Create task'}
                     </button>
-                    {submissionErrorMessage ? (
-                      <p role="alert" className="create-task-status create-task-status--error">
-                        {submissionErrorMessage}
-                      </p>
-                    ) : null}
                     {createTaskMutation.isSuccess ? (
                       <p role="status" className="create-task-status create-task-status--success">
                         Task created successfully.
