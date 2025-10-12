@@ -1,15 +1,23 @@
+import { Fragment } from 'react'
 import { useForm } from '@tanstack/react-form'
 import type { AnyFieldApi } from '@tanstack/react-form'
+import type { DeepKeys, DeepKeysOfType } from '@tanstack/form-core'
 import { useSkillsQuery } from '../features/skills/hooks/useSkillsQuery'
 import { SkillPill } from '../components/SkillPill'
 import { useCreateTaskMutation } from '../features/tasks/hooks/useCreateTaskMutation'
-import type { CreateTaskPayload } from '../services/tasks'
+import type { CreateTaskPayload, SubtaskPayload } from '../services/tasks'
 import './CreateTaskPage.css'
 
-type CreateTaskFormValues = {
+interface TaskFormValues {
   title: string
   skills: number[]
+  subtasks: TaskFormValues[]
 }
+
+type CreateTaskFormValues = TaskFormValues
+type TaskFieldPath = DeepKeys<CreateTaskFormValues>
+type TaskArrayFieldPath = DeepKeysOfType<CreateTaskFormValues, TaskFormValues[]>
+const MAX_SUBTASK_DEPTH = 3
 
 function FieldInfo({ field }: { field: AnyFieldApi }) {
   return (
@@ -20,6 +28,28 @@ function FieldInfo({ field }: { field: AnyFieldApi }) {
       {field.state.meta.isValidating ? 'Validating...' : null}
     </>
   )
+}
+
+const createEmptyTaskFormValues = (): TaskFormValues => ({
+  title: '',
+  skills: [],
+  subtasks: [],
+})
+
+const toSubtaskPayload = (task: TaskFormValues): SubtaskPayload => {
+  const payload: SubtaskPayload = {
+    title: task.title.trim(),
+  }
+
+  if (task.skills.length > 0) {
+    payload.skills = task.skills
+  }
+
+  if (task.subtasks.length > 0) {
+    payload.subtasks = task.subtasks.map(toSubtaskPayload)
+  }
+
+  return payload
 }
 
 export const CreateTaskPage = () => {
@@ -44,29 +74,165 @@ export const CreateTaskPage = () => {
         : null
 
   const form = useForm({
-    defaultValues: {
-      title: '',
-      skills: [] as number[],
-    } satisfies CreateTaskFormValues,
+    defaultValues: createEmptyTaskFormValues(),
     onSubmit: async ({ value, formApi }) => {
       createTaskMutation.reset()
 
       const payload: CreateTaskPayload = {
-        title: value.title.trim(),
-      }
-
-      if (value.skills.length > 0) {
-        payload.skills = value.skills
+        ...toSubtaskPayload(value),
       }
 
       try {
         await createTaskMutation.mutateAsync(payload)
-        formApi.reset()
+        formApi.reset(createEmptyTaskFormValues())
       } catch (error) {
         console.error('Failed to create task', error)
       }
     },
   })
+
+  const buildFieldPath = (base: TaskFieldPath | null, key: keyof TaskFormValues): TaskFieldPath => {
+    if (!base) return key as TaskFieldPath
+    return `${base}.${key}` as TaskFieldPath
+  }
+
+  const buildArrayFieldPath = (base: TaskFieldPath | null): TaskArrayFieldPath =>
+    buildFieldPath(base, 'subtasks') as TaskArrayFieldPath
+
+  const buildSubtaskBasePath = (arrayPath: TaskArrayFieldPath, index: number): TaskFieldPath =>
+    `${arrayPath}.${index}` as TaskFieldPath
+
+  const renderTaskSection = (fieldPath: TaskFieldPath | null, depth: number) => {
+    const titleFieldPath = buildFieldPath(fieldPath, 'title')
+    const skillsFieldPath = buildFieldPath(fieldPath, 'skills')
+    const subtasksFieldPath = buildArrayFieldPath(fieldPath)
+
+    const sectionStyle = depth > 0 ? { marginLeft: depth * 20 } : undefined
+
+    return (
+      <div className="task-form-section" style={sectionStyle}>
+        <form.Field
+          name={titleFieldPath}
+          validators={{
+            onChange: ({ value }) =>
+              !value
+                ? 'Task title is required'
+                : value.trim().length < 1
+                  ? 'Must include at least 1 character'
+                  : undefined,
+            onChangeAsyncDebounceMs: 500,
+            onChangeAsync: async ({ value }) => {
+              await new Promise((resolve) => setTimeout(resolve, 1000))
+              return value.includes('error') && 'No "error" allowed in first name'
+            },
+          }}
+          children={(field) => {
+            const inputId = field.name.replace(/\./g, '-')
+
+            return (
+              <>
+                <label htmlFor={inputId}>Task title: </label>
+                <input
+                  id={inputId}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                />
+                <FieldInfo field={field} />
+              </>
+            )
+          }}
+        />
+
+        <form.Field
+          name={skillsFieldPath}
+          children={(field) => {
+            const selectedSkills: number[] = Array.isArray(field.state.value)
+              ? field.state.value
+              : []
+            const groupId = `${field.name.replace(/\./g, '-')}-pill-group`
+
+            const toggleSkill = (skillId: number) => {
+              const updated = selectedSkills.includes(skillId)
+                ? selectedSkills.filter((id) => id !== skillId)
+                : [...selectedSkills, skillId]
+              field.handleChange(updated)
+            }
+
+            return (
+              <>
+                <span id={groupId}>Skills:</span>
+                {isLoadingSkills ? <p>Loading skills...</p> : null}
+                {skillsErrorMessage ? <p role="alert">{skillsErrorMessage}</p> : null}
+                {!isLoadingSkills && !skillsErrorMessage && availableSkills.length === 0 ? (
+                  <p>No skills available.</p>
+                ) : null}
+                <div className="skill-pill-list" role="group" aria-labelledby={groupId}>
+                  {availableSkills.map((skill) => (
+                    <SkillPill
+                      key={`${skillsFieldPath}-${skill.skillId}`}
+                      label={skill.skillName}
+                      isSelected={selectedSkills.includes(skill.skillId)}
+                      onClick={() => toggleSkill(skill.skillId)}
+                      onBlur={field.handleBlur}
+                    />
+                  ))}
+                </div>
+                <FieldInfo field={field} />
+              </>
+            )
+          }}
+        />
+
+        <form.Field
+          name={subtasksFieldPath}
+          children={(field) => {
+            const subtasks: TaskFormValues[] = Array.isArray(field.state.value)
+              ? field.state.value
+              : []
+            const isDepthLimitReached = depth >= MAX_SUBTASK_DEPTH
+            const isLimitReached = isDepthLimitReached
+
+            const handleAddSubtask = () => {
+              if (isLimitReached) {
+                return
+              }
+              form.pushFieldValue(subtasksFieldPath, createEmptyTaskFormValues())
+            }
+
+            return (
+              <div className="task-subtasks">
+                <button
+                  type="button"
+                  onClick={handleAddSubtask}
+                  className="btn btn-outline-primary"
+                  disabled={isLimitReached}
+                >
+                  Add subtask
+                </button>
+                {isLimitReached ? (
+                  <p className="task-subtasks__limit" role="status">
+                    Maximum depth of {MAX_SUBTASK_DEPTH} reached.
+                  </p>
+                ) : null}
+                <div className="task-subtask-list">
+                  {subtasks.map((_, index) => {
+                    const childPath = buildSubtaskBasePath(subtasksFieldPath, index)
+                    return (
+                      <Fragment key={childPath}>
+                        {renderTaskSection(childPath, depth + 1)}
+                      </Fragment>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          }}
+        />
+      </div>
+    )
+  }
 
   return (
     <section>
@@ -78,90 +244,7 @@ export const CreateTaskPage = () => {
           form.handleSubmit()
         }}
       >
-        <div>
-          {/* A type-safe field component*/}
-          <form.Field
-            name="title"
-            validators={{
-              onChange: ({ value }) =>
-                !value
-                  ? 'Task title is required'
-                  : value.length < 1
-                    ? 'Must include at least 1 character'
-                    : undefined,
-              onChangeAsyncDebounceMs: 500,
-              onChangeAsync: async ({ value }) => {
-                await new Promise((resolve) => setTimeout(resolve, 1000))
-                return (
-                  value.includes('error') && 'No "error" allowed in first name'
-                )
-              },
-            }}
-            children={(field) => {
-              // Avoid hasty abstractions. Render props are great!
-              return (
-                <>
-                  <label htmlFor={field.name}>Task title: </label>
-                  <input
-                    id={field.name}
-                    name={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                  />
-                  <FieldInfo field={field} />
-                </>
-              )
-            }}
-          />
-        </div>
-        <div>
-          <form.Field
-            name="skills"
-            children={(field) => {
-              const selectedSkills = field.state.value ?? []
-              const groupId = `${field.name}-pill-group`
-
-              const toggleSkill = (skillId: number) => {
-                const updated = selectedSkills.includes(skillId)
-                  ? selectedSkills.filter((id) => id !== skillId)
-                  : [...selectedSkills, skillId]
-                field.handleChange(updated)
-              }
-
-              console.log("selectedSkills:", selectedSkills)
-
-              return (
-                <>
-                  <span id={groupId}>Skills:</span>
-                  {isLoadingSkills ? (
-                    <p>Loading skills...</p>
-                  ) : null}
-                  {skillsErrorMessage ? <p role="alert">{skillsErrorMessage}</p> : null}
-                  {!isLoadingSkills && !skillsErrorMessage && availableSkills.length === 0 ? (
-                    <p>No skills available.</p>
-                  ) : null}
-                  <div
-                    className="skill-pill-list"
-                    role="group"
-                    aria-labelledby={groupId}
-                  >
-                    {availableSkills.map((skill) => (
-                      <SkillPill
-                        key={skill.skillId}
-                        label={skill.skillName}
-                        isSelected={selectedSkills.includes(skill.skillId)}
-                        onClick={() => toggleSkill(skill.skillId)}
-                        onBlur={field.handleBlur}
-                      />
-                    ))}
-                  </div>
-                  <FieldInfo field={field} />
-                </>
-              )
-            }}
-          />
-        </div>
+        {renderTaskSection(null, 0)}
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
           children={([canSubmit, isSubmitting]) => (
