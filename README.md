@@ -1,4 +1,8 @@
-# React + TypeScript + Vite
+# ui-task-assignment
+
+This is the frontend repository for task-assignment.
+
+For backend and design decisions, please visit README under [api-task-assignment](https://github.com/lohszeying/api-task-assignment).
 
 ## Running with Docker
 
@@ -20,18 +24,3 @@ docker compose up
 
 The Vite server runs on port `5173`. Your local files are mounted into the container, and dependencies are isolated in an internal `node_modules` volume.
 
-### Production preview
-
-Build the production image:
-
-```bash
-docker build -t ui-task-app .
-```
-
-Run the optimized bundle (served by Nginx):
-
-```bash
-docker run --rm -p 8080:80 ui-task-app
-```
-
-The production container serves the compiled assets on port `8080`.

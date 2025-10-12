@@ -1,5 +1,5 @@
 services:
-  web:
+  ui_task_assignment:
     build:
       context: .
       target: dev
