@@ -1,5 +1,5 @@
 import { useForm } from '@tanstack/react-form'
-import { TaskFormSection } from '../components/TaskFormSection/TaskFormSection'
+import { TaskFormSection } from '../components/TaskFormSection'
 import {
   createEmptyTaskFormValues,
   toCreateTaskPayload,

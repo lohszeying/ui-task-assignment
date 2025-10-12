@@ -1,8 +1,8 @@
 import { type JSX } from 'react'
 import type { AnyFieldApi } from '@tanstack/react-form'
-import { SkillPill } from '../SkillPill'
-import type { Skill } from '../../services/skills'
-import { createEmptyTaskFormValues, MAX_SUBTASK_DEPTH, type TaskFormValues } from '../../features/tasks/utils/taskFormHelpers'
+import { SkillPill } from './SkillPill'
+import type { Skill } from '../services/skills'
+import { createEmptyTaskFormValues, MAX_SUBTASK_DEPTH, type TaskFormValues } from '../features/tasks/utils/taskFormHelpers'
 import './TaskFormSection.css'
 
 type TaskFieldPath = string

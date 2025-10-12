@@ -2,6 +2,7 @@ import type { ChangeEvent } from 'react'
 import { type Task, type Skills } from '../services/tasks'
 import { type Status } from '../services/statuses'
 import { type Developer } from '../services/developers'
+import './TaskRow.css'
 
 const formatSkills = (skills?: Skills[]) => {
   if (!skills || skills.length === 0) return 'N/A'
@@ -81,6 +82,8 @@ export type TaskRowProps = {
     valueFor: (task: Task) => string
     onChange: (task: Task) => (event: ChangeEvent<HTMLSelectElement>) => void
     disabled: boolean
+    pendingTaskId: string | null
+    isUpdating: boolean
   }
   assigneeControls: {
     valueFor: (task: Task) => string
@@ -101,38 +104,56 @@ export const TaskRow = ({
   const availableDevelopers = filterDevelopersBySkills(developers, task.skills)
   const currentStatusName = statusControls.valueFor(task)
   const currentAssigneeId = assigneeControls.valueFor(task)
+  const isStatusUpdatingThisTask =
+    statusControls.pendingTaskId === task.taskId && statusControls.isUpdating
   const isAssigneeUpdatingThisTask =
     assigneeControls.pendingTaskId === task.taskId && assigneeControls.isUpdating
   const isAssigneeDisabled = assigneeControls.developersLoading || isAssigneeUpdatingThisTask
+  const isRowBusy = isStatusUpdatingThisTask || isAssigneeUpdatingThisTask
 
   return (
-    <tr>
-      <td>
-        <div className="fw-semibold">{task.title}</div>
-      </td>
-      <td>
-        <span>{formatSkills(task.skills)}</span>
-      </td>
-      <td className="text-center">
-        <select
-          className="form-select form-select-sm w-auto d-inline-block"
-          value={currentStatusName}
-          onChange={statusControls.onChange(task)}
-          disabled={statusControls.disabled}
-        >
-          {buildStatusOptions(statuses, currentStatusName)}
-        </select>
-      </td>
-      <td className="text-center">
-        <select
-          className="form-select form-select-sm w-auto d-inline-block"
-          value={currentAssigneeId}
-          onChange={assigneeControls.onChange(task)}
-          disabled={isAssigneeDisabled}
-        >
-          {buildAssigneeOptions(availableDevelopers, task.developer)}
-        </select>
-      </td>
-    </tr>
+    <article className={`task-card${isRowBusy ? ' task-card--busy' : ''}`} aria-busy={isRowBusy}>
+      <header className="task-card__header">
+        <h2 className="task-card__title">{task.title}</h2>
+        <p className="task-card__meta">Task ID: {task.taskId}</p>
+      </header>
+
+      <div className="task-card__body">
+        <div className="task-card__section">
+          <span className="task-card__label">Required skills</span>
+          <p className="task-card__value">{formatSkills(task.skills)}</p>
+        </div>
+
+        <div className="task-card__section task-card__section--control">
+          <label className="task-card__label" htmlFor={`status-${task.taskId}`}>
+            Status
+          </label>
+          <select
+            id={`status-${task.taskId}`}
+            className="task-card__select"
+            value={currentStatusName}
+            onChange={statusControls.onChange(task)}
+            disabled={statusControls.disabled}
+          >
+            {buildStatusOptions(statuses, currentStatusName)}
+          </select>
+        </div>
+
+        <div className="task-card__section task-card__section--control">
+          <label className="task-card__label" htmlFor={`assignee-${task.taskId}`}>
+            Assignee
+          </label>
+          <select
+            id={`assignee-${task.taskId}`}
+            className="task-card__select task-card__select--wide"
+            value={currentAssigneeId}
+            onChange={assigneeControls.onChange(task)}
+            disabled={isAssigneeDisabled}
+          >
+            {buildAssigneeOptions(availableDevelopers, task.developer)}
+          </select>
+        </div>
+      </div>
+    </article>
   )
 }
