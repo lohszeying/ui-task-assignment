@@ -70,7 +70,7 @@ export const TaskFormSection = ({
   isLoadingSkills,
   skillsErrorMessage
 }: TaskFormSectionProps) => {
-  const titleFieldPath = buildFieldPath(fieldPath, 'title')
+  const descriptionFieldPath = buildFieldPath(fieldPath, 'title')
   const skillsFieldPath = buildFieldPath(fieldPath, 'skills')
   const subtasksFieldPath = buildArrayFieldPath(fieldPath)
 
@@ -94,18 +94,18 @@ export const TaskFormSection = ({
       ) : null}
 
       <form.Field
-        name={titleFieldPath}
+        name={descriptionFieldPath}
         validators={{
           onChange: ({ value }) =>
             !value
-              ? 'Task title is required'
-              : value.trim().length < 1
-                ? 'Must include at least 1 character'
+              ? 'Task description is required'
+              : value.trim().length < 10
+                ? 'Describe the task in at least 10 characters'
                 : undefined,
           onChangeAsyncDebounceMs: 500,
           onChangeAsync: async ({ value }) => {
             await new Promise((resolve) => setTimeout(resolve, 1000))
-            return value.includes('error') ? 'No "error" allowed in first name' : undefined
+            return value.includes('error') ? 'No "error" allowed in description' : undefined
           }
         }}
         children={(field) => {
@@ -114,16 +114,16 @@ export const TaskFormSection = ({
           return (
             <div className="task-field">
               <label htmlFor={inputId} className="task-field__label">
-                Task title
+                Task description
               </label>
-              <input
+              <textarea
                 id={inputId}
                 name={field.name}
                 value={field.state.value}
                 onBlur={field.handleBlur}
-                type="text"
-                className="task-field__input"
-                placeholder="Write a clear, concise title"
+                className="task-field__control task-field__control--textarea"
+                placeholder="Describe what needs to get done..."
+                rows={4}
                 onChange={(e) => field.handleChange(e.target.value)}
               />
               <FieldInfo field={field} />

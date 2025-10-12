@@ -79,7 +79,7 @@
   color: #6b7280;
 }
 
-.task-field__input {
+.task-field__control {
   width: 100%;
   border-radius: 0.75rem;
   border: 1px solid #d1d5db;
@@ -90,14 +90,21 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.task-field__input:hover {
+.task-field__control:hover {
   border-color: #818cf8;
 }
 
-.task-field__input:focus-visible {
+.task-field__control:focus-visible {
   border-color: #6366f1;
   box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
   outline: none;
+}
+
+.task-field__control--textarea {
+  min-height: 7rem;
+  resize: vertical;
+  line-height: 1.6;
+  padding: 0.75rem 0.95rem;
 }
 
 .task-field__messages {
