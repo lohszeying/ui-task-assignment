@@ -5,11 +5,15 @@ import type { useCreateTaskForm } from '../hooks/useCreateTaskForm'
 
 type TaskFormApi = ReturnType<typeof useCreateTaskForm>['form']
 
+type SkillsCollections = {
+  data: Skill[];
+  isLoading: boolean;
+  errorMessage: string | null;
+}
+
 export type CreateTaskFormProps = {
   form: TaskFormApi
-  availableSkills: Skill[]
-  isLoadingSkills: boolean
-  skillsErrorMessage: string | null
+  skillsCollections: SkillsCollections
   isMutationPending: boolean
   isMutationSuccess: boolean
 }
@@ -22,9 +26,7 @@ const toSectionFormApi = (form: TaskFormApi): TaskFormSectionProps['form'] => ({
 
 export const CreateTaskForm = ({
   form,
-  availableSkills,
-  isLoadingSkills,
-  skillsErrorMessage,
+  skillsCollections,
   isMutationPending,
   isMutationSuccess,
 }: CreateTaskFormProps) => {
@@ -53,9 +55,9 @@ export const CreateTaskForm = ({
                   form={sectionFormApi}
                   fieldPath={null}
                   depth={0}
-                  availableSkills={availableSkills}
-                  isLoadingSkills={isLoadingSkills}
-                  skillsErrorMessage={skillsErrorMessage}
+                  availableSkills={skillsCollections.data}
+                  isLoadingSkills={skillsCollections.isLoading}
+                  skillsErrorMessage={skillsCollections.errorMessage}
                   isDisabled={isBusy}
                 />
               </div>

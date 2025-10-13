@@ -7,9 +7,7 @@ import './CreateTaskPage.css'
 export const CreateTaskPage = () => {
   const {
     form,
-    availableSkills,
-    isLoadingSkills,
-    skillsErrorMessage,
+    skillsCollections,
     createTaskMutation,
     submissionErrorMessage,
   } = useCreateTaskForm()
@@ -31,9 +29,7 @@ export const CreateTaskPage = () => {
         </header>
         <CreateTaskForm
           form={form}
-          availableSkills={availableSkills}
-          isLoadingSkills={isLoadingSkills}
-          skillsErrorMessage={skillsErrorMessage}
+          skillsCollections={skillsCollections}
           isMutationPending={createTaskMutation.isPending}
           isMutationSuccess={createTaskMutation.isSuccess}
         />

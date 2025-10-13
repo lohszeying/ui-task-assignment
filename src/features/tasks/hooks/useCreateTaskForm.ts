@@ -46,9 +46,11 @@ export const useCreateTaskForm = () => {
 
   return {
     form,
-    availableSkills: skills,
-    isLoadingSkills,
-    skillsErrorMessage,
+    skillsCollections: {
+      data: skills,
+      isLoading: isLoadingSkills,
+      errorMessage: skillsErrorMessage,
+    },
     createTaskMutation,
     submissionErrorMessage,
   }
