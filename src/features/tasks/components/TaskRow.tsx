@@ -33,19 +33,26 @@ const filterDevelopersBySkills = (developers: Developer[], skills?: Skill[]) => 
   })
 }
 
-const buildStatusDropdownOptions = (statuses: Status[], currentStatusName: string) => {
-  const hasCurrentStatus = currentStatusName
-    ? statuses.some((status) => status.statusName === currentStatusName)
+const toStatusIdString = (status?: Status) =>
+  typeof status?.statusId === 'number' ? String(status.statusId) : ''
+
+const buildStatusDropdownOptions = (
+  statuses: Status[],
+  taskStatus?: Status,
+) => {
+  const normalizedCurrentStatusId = toStatusIdString(taskStatus)
+  const hasCurrentStatus = normalizedCurrentStatusId
+    ? statuses.some((status) => String(status.statusId) === normalizedCurrentStatusId)
     : false
 
   return (
     <>
       <option value="">Select status</option>
-      {!hasCurrentStatus && currentStatusName && (
-        <option value={currentStatusName}>{currentStatusName}</option>
+      {!hasCurrentStatus && taskStatus && typeof taskStatus.statusId === 'number' && (
+        <option value={String(taskStatus.statusId)}>{taskStatus.statusName}</option>
       )}
       {statuses.map((status) => (
-        <option key={status.statusId} value={status.statusName}>
+        <option key={status.statusId} value={String(status.statusId)}>
           {status.statusName}
         </option>
       ))}
@@ -101,7 +108,7 @@ export const TaskRow = ({
   assigneeControls,
 }: TaskRowProps) => {
   const availableDevelopers = filterDevelopersBySkills(developers, task.skills)
-  const currentStatusName = statusControls.valueFor(task)
+  const currentStatusId = statusControls.valueFor(task)
   const currentAssigneeId = assigneeControls.valueFor(task)
   const isStatusUpdatingThisTask =
     statusControls.pendingTaskId === task.taskId && statusControls.isUpdating
@@ -128,11 +135,11 @@ export const TaskRow = ({
         <TaskSelectControl
           label="Status"
           id={`status-${task.taskId}`}
-          value={currentStatusName}
+          value={currentStatusId}
           onChange={statusControls.onChange(task)}
           disabled={isStatusDisabled}
         >
-          {buildStatusDropdownOptions(statuses, currentStatusName)}
+          {buildStatusDropdownOptions(statuses, task.status)}
         </TaskSelectControl>
         
         <TaskSelectControl

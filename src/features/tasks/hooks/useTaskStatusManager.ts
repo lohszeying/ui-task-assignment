@@ -3,7 +3,8 @@ import { useMutation } from '@tanstack/react-query'
 import { taskService } from '../../../services/tasks'
 import type { Task, Status } from '../../../types/tasks'
 
-const extractStatusName = (status?: Status) => status?.statusName ?? ''
+const extractStatusId = (status?: Status) =>
+  typeof status?.statusId === 'number' ? String(status.statusId) : ''
 
 export const useTaskStatusManager = (tasks: Task[] | undefined, statuses: Status[]) => {
   const [selectedStatuses, setSelectedStatuses] = useState<Record<string, string>>({})
@@ -16,7 +17,7 @@ export const useTaskStatusManager = (tasks: Task[] | undefined, statuses: Status
     }
 
     const mappedStatuses = tasks.reduce<Record<string, string>>((accumulator, task) => {
-      accumulator[task.taskId] = extractStatusName(task.status)
+      accumulator[task.taskId] = extractStatusId(task.status)
       return accumulator
     }, {})
 
@@ -29,37 +30,40 @@ export const useTaskStatusManager = (tasks: Task[] | undefined, statuses: Status
   })
 
   const getStatusValue = (task: Task) =>
-    selectedStatuses[task.taskId] ?? extractStatusName(task.status)
+    selectedStatuses[task.taskId] ?? extractStatusId(task.status)
 
   const handleStatusChange = (task: Task) => async (event: ChangeEvent<HTMLSelectElement>) => {
-    const nextStatusName = event.target.value
-    const previousStatusName = getStatusValue(task)
+    const nextStatusId = event.target.value
+    const previousStatusId = getStatusValue(task)
 
-    if (nextStatusName === previousStatusName) {
+    if (nextStatusId === previousStatusId) {
+      return
+    }
+
+    if (!nextStatusId) {
+      setSelectedStatuses((current) => ({ ...current, [task.taskId]: previousStatusId }))
       return
     }
 
     const selectedStatus = statuses.find(
-      (status) => status.statusName === nextStatusName,
+      (status) => String(status.statusId) === nextStatusId,
     )
 
     if (!selectedStatus) {
-      setSelectedStatuses((current) => ({ ...current, [task.taskId]: previousStatusName }))
-      if (nextStatusName !== '') {
-        setError('Selected status is not available.')
-      }
+      setSelectedStatuses((current) => ({ ...current, [task.taskId]: previousStatusId }))
+      setError('Selected status is not available.')
       return
     }
 
     setError(null)
-    setSelectedStatuses((current) => ({ ...current, [task.taskId]: nextStatusName }))
+    setSelectedStatuses((current) => ({ ...current, [task.taskId]: nextStatusId }))
 
     setPendingTaskId(task.taskId)
 
     try {
       await updateStatusMutation.mutateAsync({
         taskId: task.taskId,
-        statusId: String(selectedStatus.statusId),
+        statusId: nextStatusId,
       })
     } catch (mutationError) {
       const message =
@@ -69,7 +73,7 @@ export const useTaskStatusManager = (tasks: Task[] | undefined, statuses: Status
       setError(message)
       setSelectedStatuses((current) => ({
         ...current,
-        [task.taskId]: previousStatusName,
+        [task.taskId]: previousStatusId,
       }))
     } finally {
       setPendingTaskId(null)
