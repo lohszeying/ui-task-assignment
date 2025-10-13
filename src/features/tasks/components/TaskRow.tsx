@@ -79,9 +79,9 @@ export type TaskRowProps = {
   statusControls: {
     valueFor: (task: Task) => string
     onChange: (task: Task) => (event: ChangeEvent<HTMLSelectElement>) => void
-    disabled: boolean
     pendingTaskId: string | null
     isUpdating: boolean
+    statusesLoading: boolean
   }
   assigneeControls: {
     valueFor: (task: Task) => string
@@ -106,6 +106,8 @@ export const TaskRow = ({
     statusControls.pendingTaskId === task.taskId && statusControls.isUpdating
   const isAssigneeUpdatingThisTask =
     assigneeControls.pendingTaskId === task.taskId && assigneeControls.isUpdating
+  const isStatusDisabled =
+    statuses.length === 0 || statusControls.statusesLoading || isStatusUpdatingThisTask
   const isAssigneeDisabled = assigneeControls.developersLoading || isAssigneeUpdatingThisTask
   const isRowBusy = isStatusUpdatingThisTask || isAssigneeUpdatingThisTask
 
@@ -131,7 +133,7 @@ export const TaskRow = ({
             className="task-card__select"
             value={currentStatusName}
             onChange={statusControls.onChange(task)}
-            disabled={statusControls.disabled}
+            disabled={isStatusDisabled}
           >
             {buildStatusOptions(statuses, currentStatusName)}
           </select>

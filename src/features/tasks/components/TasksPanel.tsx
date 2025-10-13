@@ -60,15 +60,10 @@ export const TasksPanel = ({
   taskAssigneeManager,
 }: TasksPanelProps) => {
   const hasTasks = tasksCollections.data.length > 0
-  const showStatusDropdown = statusesCollections.data.length > 0
 
   const renderTasks = () => (
     <div className="tasks-list">
       {tasksCollections.data.map((task) => {
-        const isStatusUpdatingThisTask =
-          taskStatusManager.pendingTaskId === task.taskId && taskStatusManager.isUpdating
-        const statusDisabled = !showStatusDropdown || isStatusUpdatingThisTask || statusesCollections.isLoading
-
         return (
           <TaskRow
             key={task.taskId}
@@ -78,9 +73,9 @@ export const TasksPanel = ({
             statusControls={{
               valueFor: taskStatusManager.getStatusValue,
               onChange: taskStatusManager.handleStatusChange,
-              disabled: statusDisabled,
               pendingTaskId: taskStatusManager.pendingTaskId,
               isUpdating: taskStatusManager.isUpdating,
+              statusesLoading: statusesCollections.isLoading,
             }}
             assigneeControls={{
               valueFor: taskAssigneeManager.getAssigneeValue,
