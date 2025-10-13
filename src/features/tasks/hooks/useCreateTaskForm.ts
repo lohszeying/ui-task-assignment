@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { useForm } from '@tanstack/react-form'
 import {
   createEmptyTaskFormValues,
@@ -29,20 +28,13 @@ export const useCreateTaskForm = () => {
     },
   })
 
-  const skillsErrorMessage = useMemo(() => {
-    const message = normalizeError(skillsError)
-    if (message) {
-      return message
-    }
-    return skillsError ? 'Unable to load skills. Please try again later.' : null
-  }, [skillsError])
+  const skillsErrorMessage =
+    normalizeError(skillsError) ??
+    (skillsError ? 'Unable to load skills. Please try again later.' : null)
 
-  const submissionErrorMessage = useMemo(
-    () =>
-      normalizeError(createTaskMutation.error) ??
-      (createTaskMutation.error ? 'Failed to create task.' : null),
-    [createTaskMutation.error],
-  )
+  const submissionErrorMessage =
+    normalizeError(createTaskMutation.error) ??
+    (createTaskMutation.error ? 'Failed to create task.' : null)
 
   return {
     form,
