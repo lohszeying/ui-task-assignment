@@ -8,7 +8,7 @@ const formatSkills = (skills?: Skill[]) => {
   return skills.map((skill) => skill.skillName).join(', ')
 }
 
-const buildStatusOptions = (statuses: Status[], currentStatusName: string) => {
+const buildStatusDropdownOptions = (statuses: Status[], currentStatusName: string) => {
   const hasCurrentStatus = currentStatusName
     ? statuses.some((status) => status.statusName === currentStatusName)
     : false
@@ -52,7 +52,7 @@ const filterDevelopersBySkills = (developers: Developer[], skills?: Skill[]) => 
   })
 }
 
-const buildAssigneeOptions = (developers: Developer[], currentDeveloper?: Developer) => {
+const buildAssigneeDropdownOptions = (developers: Developer[], currentDeveloper?: Developer) => {
   const hasCurrentDeveloper = currentDeveloper
     ? developers.some((developer) => developer.developerId === currentDeveloper.developerId)
     : false
@@ -135,7 +135,7 @@ export const TaskRow = ({
             onChange={statusControls.onChange(task)}
             disabled={isStatusDisabled}
           >
-            {buildStatusOptions(statuses, currentStatusName)}
+            {buildStatusDropdownOptions(statuses, currentStatusName)}
           </select>
         </div>
 
@@ -150,7 +150,7 @@ export const TaskRow = ({
             onChange={assigneeControls.onChange(task)}
             disabled={isAssigneeDisabled}
           >
-            {buildAssigneeOptions(availableDevelopers, task.developer)}
+            {buildAssigneeDropdownOptions(availableDevelopers, task.developer)}
           </select>
         </div>
       </div>
