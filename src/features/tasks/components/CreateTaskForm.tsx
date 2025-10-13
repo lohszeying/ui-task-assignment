@@ -1,7 +1,8 @@
 import type { FormEvent } from 'react'
 import type { Skill } from '../../../types/tasks'
-import { TaskFormSection, type TaskFormSectionProps } from './TaskFormSection'
+import { TaskFormSection } from './TaskFormSection'
 import type { useCreateTaskForm } from '../hooks/useCreateTaskForm'
+import type { TaskFormSectionProps } from './TaskFormSection.types'
 
 type TaskFormApi = ReturnType<typeof useCreateTaskForm>['form']
 
