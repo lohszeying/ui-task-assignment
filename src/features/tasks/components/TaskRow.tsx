@@ -1,31 +1,12 @@
 import type { ChangeEvent } from 'react'
 import type { Task, Skill, Status, Developer } from '../../../types/tasks'
+import { TaskSelectControl } from './TaskSelectControl'
 import './TaskRow.css'
 
 const formatSkills = (skills?: Skill[]) => {
   if (!skills || skills.length === 0) return 'N/A'
 
   return skills.map((skill) => skill.skillName).join(', ')
-}
-
-const buildStatusDropdownOptions = (statuses: Status[], currentStatusName: string) => {
-  const hasCurrentStatus = currentStatusName
-    ? statuses.some((status) => status.statusName === currentStatusName)
-    : false
-
-  return (
-    <>
-      <option value="">Select status</option>
-      {!hasCurrentStatus && currentStatusName && (
-        <option value={currentStatusName}>{currentStatusName}</option>
-      )}
-      {statuses.map((status) => (
-        <option key={status.statusId} value={status.statusName}>
-          {status.statusName}
-        </option>
-      ))}
-    </>
-  )
 }
 
 const filterDevelopersBySkills = (developers: Developer[], skills?: Skill[]) => {
@@ -50,6 +31,26 @@ const filterDevelopersBySkills = (developers: Developer[], skills?: Skill[]) => 
 
     return requiredSkillIds.every((skillId) => developerSkillIds.has(skillId))
   })
+}
+
+const buildStatusDropdownOptions = (statuses: Status[], currentStatusName: string) => {
+  const hasCurrentStatus = currentStatusName
+    ? statuses.some((status) => status.statusName === currentStatusName)
+    : false
+
+  return (
+    <>
+      <option value="">Select status</option>
+      {!hasCurrentStatus && currentStatusName && (
+        <option value={currentStatusName}>{currentStatusName}</option>
+      )}
+      {statuses.map((status) => (
+        <option key={status.statusId} value={status.statusName}>
+          {status.statusName}
+        </option>
+      ))}
+    </>
+  )
 }
 
 const buildAssigneeDropdownOptions = (developers: Developer[], currentDeveloper?: Developer) => {
@@ -124,35 +125,26 @@ export const TaskRow = ({
           <p className="task-card__value">{formatSkills(task.skills)}</p>
         </div>
 
-        <div className="task-card__section task-card__section--control">
-          <label className="task-card__label" htmlFor={`status-${task.taskId}`}>
-            Status
-          </label>
-          <select
-            id={`status-${task.taskId}`}
-            className="task-card__select"
-            value={currentStatusName}
-            onChange={statusControls.onChange(task)}
-            disabled={isStatusDisabled}
-          >
-            {buildStatusDropdownOptions(statuses, currentStatusName)}
-          </select>
-        </div>
-
-        <div className="task-card__section task-card__section--control">
-          <label className="task-card__label" htmlFor={`assignee-${task.taskId}`}>
-            Assignee
-          </label>
-          <select
-            id={`assignee-${task.taskId}`}
-            className="task-card__select task-card__select--wide"
-            value={currentAssigneeId}
-            onChange={assigneeControls.onChange(task)}
-            disabled={isAssigneeDisabled}
-          >
-            {buildAssigneeDropdownOptions(availableDevelopers, task.developer)}
-          </select>
-        </div>
+        <TaskSelectControl
+          label="Status"
+          id={`status-${task.taskId}`}
+          value={currentStatusName}
+          onChange={statusControls.onChange(task)}
+          disabled={isStatusDisabled}
+        >
+          {buildStatusDropdownOptions(statuses, currentStatusName)}
+        </TaskSelectControl>
+        
+        <TaskSelectControl
+          label="Assignee"
+          id={`assignee-${task.taskId}`}
+          value={currentAssigneeId}
+          onChange={assigneeControls.onChange(task)}
+          disabled={isAssigneeDisabled}
+          selectClassName="task-card__select--wide"
+        >
+          {buildAssigneeDropdownOptions(availableDevelopers, task.developer)}
+        </TaskSelectControl>
       </div>
     </article>
   )
