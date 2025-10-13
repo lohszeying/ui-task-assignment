@@ -1,6 +1,6 @@
-import type { AnyFieldApi } from '@tanstack/react-form'
+import type { TaskFieldApi } from './TaskFormSection.types'
 
-export const TaskFieldMessages = ({ field }: { field: AnyFieldApi }) => {
+export const TaskFieldMessages = ({ field }: { field: TaskFieldApi }) => {
   const showError = field.state.meta.isTouched && !field.state.meta.isValid
   const showValidating = field.state.meta.isValidating
 

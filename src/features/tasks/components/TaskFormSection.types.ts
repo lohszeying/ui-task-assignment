@@ -1,10 +1,28 @@
 import type { JSX } from 'react'
-import type { AnyFieldApi } from '@tanstack/react-form'
 import type { Skill } from '../../../types/tasks'
 import type { TaskFormValues } from '../utils/taskFormHelpers'
 
 export type TaskFieldPath = string
 export type TaskArrayFieldPath = string
+
+export interface TaskFieldMeta {
+  isTouched: boolean
+  isValid: boolean
+  isValidating: boolean
+  errors: string[]
+}
+
+export interface TaskFieldState<Value> {
+  value: Value
+  meta: TaskFieldMeta
+}
+
+export interface TaskFieldApi<Value = unknown> {
+  name: string
+  state: TaskFieldState<Value>
+  handleBlur: () => void
+  handleChange: (value: Value) => void
+}
 
 export interface TaskFormSectionForm {
   Field: (props: {
@@ -14,7 +32,7 @@ export interface TaskFormSectionForm {
       onChangeAsyncDebounceMs?: number
       onChangeAsync?: (args: { value: string }) => Promise<string | undefined>
     }
-    children: (field: AnyFieldApi) => JSX.Element
+    children: (field: TaskFieldApi) => JSX.Element
   }) => JSX.Element
   pushFieldValue: (field: TaskArrayFieldPath, value: TaskFormValues) => void
   deleteField: (field: TaskFieldPath) => void

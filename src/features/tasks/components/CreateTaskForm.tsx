@@ -2,7 +2,7 @@ import type { FormEvent } from 'react'
 import type { Skill } from '../../../types/tasks'
 import { TaskFormSection } from './TaskFormSection'
 import type { useCreateTaskForm } from '../hooks/useCreateTaskForm'
-import type { TaskFormSectionProps } from './TaskFormSection.types'
+import type { TaskFormSectionForm } from './TaskFormSection.types'
 
 type TaskFormApi = ReturnType<typeof useCreateTaskForm>['form']
 
@@ -19,12 +19,6 @@ export type CreateTaskFormProps = {
   isMutationSuccess: boolean
 }
 
-const toSectionFormApi = (form: TaskFormApi): TaskFormSectionProps['form'] => ({
-  Field: form.Field,
-  pushFieldValue: form.pushFieldValue,
-  deleteField: form.deleteField,
-})
-
 export const CreateTaskForm = ({
   form,
   skillsCollections,
@@ -37,7 +31,7 @@ export const CreateTaskForm = ({
     form.handleSubmit()
   }
 
-  const sectionFormApi = toSectionFormApi(form)
+  const sectionFormApi = form as unknown as TaskFormSectionForm
 
   return (
     <form
