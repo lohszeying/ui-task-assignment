@@ -19,16 +19,26 @@ export const useTasksOverview = () => {
   const assigneeUpdateErrorMessage = normalizeError(taskAssigneeManager.error)
 
   return {
-    tasks: tasksQuery.tasks,
-    statuses: statusesQuery.statuses,
-    developers: developersQuery.developers,
-    isLoadingTasks: tasksQuery.isLoading,
-    isLoadingStatuses: statusesQuery.isLoading,
-    isLoadingDevelopers: developersQuery.isLoading,
-    tasksErrorMessage,
-    statusUpdateErrorMessage,
-    assigneeUpdateErrorMessage,
-    taskStatusManager,
-    taskAssigneeManager,
+    tasksCollections: {
+      data: tasksQuery.tasks,
+      isLoading: tasksQuery.isLoading,
+      errorMessage: tasksErrorMessage,
+    },
+    statusesCollections: {
+      data: statusesQuery.statuses,
+      isLoading: statusesQuery.isLoading,
+    },
+    developersCollections: {
+      data: developersQuery.developers,
+      isLoading: developersQuery.isLoading,
+    },
+    statusManagement: {
+      manager: taskStatusManager,
+      errorMessage: statusUpdateErrorMessage,
+    },
+    assigneeManagement: {
+      manager: taskAssigneeManager,
+      errorMessage: assigneeUpdateErrorMessage,
+    },
   }
 }

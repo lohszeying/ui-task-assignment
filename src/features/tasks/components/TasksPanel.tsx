@@ -7,15 +7,27 @@ import type { useTaskAssigneeManager } from '../hooks/useTaskAssigneeManager'
 type TaskStatusManager = ReturnType<typeof useTaskStatusManager>
 type TaskAssigneeManager = ReturnType<typeof useTaskAssigneeManager>
 
+type TasksCollections = {
+  data: Task[];
+  isLoading: boolean;
+  errorMessage: string | null;
+}
+
+type StatusesCollections = {
+  data: Status[];
+  isLoading: boolean;
+}
+
+type DevelopersCollections = {
+  data: Developer[];
+  isLoading: boolean;
+}
+
 export type TasksPanelProps = {
   title?: string
-  tasks: Task[]
-  statuses: Status[]
-  developers: Developer[]
-  isLoadingTasks: boolean
-  tasksErrorMessage: string | null
-  isLoadingStatuses: boolean
-  isLoadingDevelopers: boolean
+  tasksCollections: TasksCollections
+  statusesCollections: StatusesCollections
+  developersCollections: DevelopersCollections
   taskStatusManager: TaskStatusManager
   taskAssigneeManager: TaskAssigneeManager
 }
@@ -41,32 +53,28 @@ const EmptyState = () => (
 
 export const TasksPanel = ({
   title = 'Task List',
-  tasks,
-  statuses,
-  developers,
-  isLoadingTasks,
-  tasksErrorMessage,
-  isLoadingStatuses,
-  isLoadingDevelopers,
+  tasksCollections,
+  statusesCollections,
+  developersCollections,
   taskStatusManager,
   taskAssigneeManager,
 }: TasksPanelProps) => {
-  const hasTasks = tasks.length > 0
-  const showStatusDropdown = statuses.length > 0
+  const hasTasks = tasksCollections.data.length > 0
+  const showStatusDropdown = statusesCollections.data.length > 0
 
   const renderTasks = () => (
     <div className="tasks-list">
-      {tasks.map((task) => {
+      {tasksCollections.data.map((task) => {
         const isStatusUpdatingThisTask =
           taskStatusManager.pendingTaskId === task.taskId && taskStatusManager.isUpdating
-        const statusDisabled = !showStatusDropdown || isStatusUpdatingThisTask || isLoadingStatuses
+        const statusDisabled = !showStatusDropdown || isStatusUpdatingThisTask || statusesCollections.isLoading
 
         return (
           <TaskRow
             key={task.taskId}
             task={task}
-            statuses={statuses}
-            developers={developers}
+            statuses={statusesCollections.data}
+            developers={developersCollections.data}
             statusControls={{
               valueFor: taskStatusManager.getStatusValue,
               onChange: taskStatusManager.handleStatusChange,
@@ -79,7 +87,7 @@ export const TasksPanel = ({
               onChange: taskAssigneeManager.handleAssigneeChange,
               pendingTaskId: taskAssigneeManager.pendingTaskId,
               isUpdating: taskAssigneeManager.isUpdating,
-              developersLoading: isLoadingDevelopers,
+              developersLoading: developersCollections.isLoading,
             }}
           />
         )
@@ -89,10 +97,10 @@ export const TasksPanel = ({
 
   let content: JSX.Element
 
-  if (isLoadingTasks) {
+  if (tasksCollections.isLoading) {
     content = <LoadingState />
-  } else if (tasksErrorMessage) {
-    content = <ErrorState message={tasksErrorMessage} />
+  } else if (tasksCollections.errorMessage) {
+    content = <ErrorState message={tasksCollections.errorMessage} />
   } else if (!hasTasks) {
     content = <EmptyState />
   } else {
@@ -104,7 +112,6 @@ export const TasksPanel = ({
       <header className="tasks-panel__header">
         <h1 className="tasks-panel__title">{title}</h1>
       </header>
-
       <div className="tasks-panel__content">{content}</div>
     </div>
   )

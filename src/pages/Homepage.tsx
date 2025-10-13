@@ -5,44 +5,28 @@ import { useTasksOverview } from '../features/tasks/hooks/useTasksOverview'
 import './Homepage.css'
 
 export const Homepage = () => {
-  const {
-    tasks,
-    statuses,
-    developers,
-    isLoadingTasks,
-    isLoadingStatuses,
-    isLoadingDevelopers,
-    tasksErrorMessage,
-    statusUpdateErrorMessage,
-    assigneeUpdateErrorMessage,
-    taskStatusManager,
-    taskAssigneeManager,
-  } = useTasksOverview()
+  const {tasksCollections, statusesCollections, developersCollections, statusManagement, assigneeManagement} = useTasksOverview()
+  
+  useEffect(() => {
+    if (statusManagement.errorMessage) {
+      toast.error(statusManagement.errorMessage)
+    }
+  }, [statusManagement.errorMessage])
 
   useEffect(() => {
-    if (statusUpdateErrorMessage) {
-      toast.error(statusUpdateErrorMessage)
+    if (assigneeManagement.errorMessage) {
+      toast.error(assigneeManagement.errorMessage)
     }
-  }, [statusUpdateErrorMessage])
-
-  useEffect(() => {
-    if (assigneeUpdateErrorMessage) {
-      toast.error(assigneeUpdateErrorMessage)
-    }
-  }, [assigneeUpdateErrorMessage])
+  }, [assigneeManagement.errorMessage])
 
   return (
     <section className="homepage">
       <TasksPanel
-        tasks={tasks}
-        statuses={statuses}
-        developers={developers}
-        isLoadingTasks={isLoadingTasks}
-        tasksErrorMessage={tasksErrorMessage}
-        isLoadingStatuses={isLoadingStatuses}
-        isLoadingDevelopers={isLoadingDevelopers}
-        taskStatusManager={taskStatusManager}
-        taskAssigneeManager={taskAssigneeManager}
+        tasksCollections={tasksCollections}
+        statusesCollections={statusesCollections}
+        developersCollections={developersCollections}
+        taskStatusManager={statusManagement.manager}
+        taskAssigneeManager={assigneeManagement.manager}
       />
     </section>
   )
