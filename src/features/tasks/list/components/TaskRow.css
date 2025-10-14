@@ -101,10 +101,6 @@
   box-shadow: none;
 }
 
-.task-card__select--wide {
-  min-width: 220px;
-}
-
 @media (max-width: 640px) {
   .task-card {
     padding: 1.25rem;

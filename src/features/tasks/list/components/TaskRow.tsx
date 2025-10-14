@@ -148,7 +148,6 @@ export const TaskRow = ({
           value={currentAssigneeId}
           onChange={assigneeControls.onChange(task)}
           disabled={isAssigneeDisabled}
-          selectClassName="task-card__select--wide"
         >
           {buildAssigneeDropdownOptions(availableDevelopers, task.developer)}
         </TaskSelectControl>

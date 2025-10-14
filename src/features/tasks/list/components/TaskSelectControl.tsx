@@ -6,7 +6,6 @@ type TaskSelectControlProps = {
   value: string
   onChange: (event: ChangeEvent<HTMLSelectElement>) => void
   disabled: boolean
-  selectClassName?: string
   children: ReactNode
 }
 
@@ -16,14 +15,8 @@ export const TaskSelectControl = ({
   value,
   onChange,
   disabled,
-  selectClassName,
   children,
 }: TaskSelectControlProps) => {
-  const selectClasses = ['task-card__select']
-  if (selectClassName) {
-    selectClasses.push(selectClassName)
-  }
-
   return (
     <div className="task-card__section task-card__section--control">
       <label className="task-card__label" htmlFor={id}>
@@ -31,7 +24,7 @@ export const TaskSelectControl = ({
       </label>
       <select
         id={id}
-        className={selectClasses.join(' ')}
+        className="task-card__select"
         value={value}
         onChange={onChange}
         disabled={disabled}
