@@ -1,5 +1,5 @@
 import type { JSX } from 'react'
-import type { Skill } from '../../../types/tasks'
+import type { Skill } from '../../../../types/tasks'
 import type { TaskFormValues } from '../utils/taskFormHelpers'
 
 export type TaskFieldPath = string

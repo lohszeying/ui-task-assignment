@@ -1,6 +1,6 @@
 import type { TaskFieldPath, TaskFormSectionForm } from './TaskFormSection.types'
-import type { Skill } from '../../../types/tasks'
-import { SkillPill } from '../../skills/components/SkillPill'
+import type { Skill } from '../../../../types/tasks'
+import { SkillPill } from '../../../skills/components/SkillPill'
 import { TaskFieldMessages } from './TaskFieldMessages'
 
 type TaskSkillsFieldProps = {

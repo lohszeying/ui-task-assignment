@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react'
-import type { Task, Skill, Status, Developer } from '../../../types/tasks'
+import type { Task, Skill, Status, Developer } from '../../../../types/tasks'
 import { TaskSelectControl } from './TaskSelectControl'
 import './TaskRow.css'
 

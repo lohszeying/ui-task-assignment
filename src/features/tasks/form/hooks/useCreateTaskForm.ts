@@ -5,8 +5,8 @@ import {
   type CreateTaskFormValues,
 } from '../utils/taskFormHelpers'
 import { useCreateTaskMutation } from './useCreateTaskMutation'
-import { useSkillsQuery } from '../../skills/hooks/useSkillsQuery'
-import { normalizeError } from '../../../utils/error'
+import { useSkillsQuery } from '../../../skills/hooks/useSkillsQuery'
+import { normalizeError } from '../../../../utils/error'
 
 export const useCreateTaskForm = () => {
   const { skills, isLoading: isLoadingSkills, error: skillsError } = useSkillsQuery()

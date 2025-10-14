@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { developerService } from '../../../services/developers'
+import { developerService } from '../../../../services/developers'
 
 export const useDevelopersQuery = () => {
   const query = useQuery({

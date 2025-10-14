@@ -1,5 +1,5 @@
 import type { JSX } from 'react'
-import type { Task, Status, Developer } from '../../../types/tasks'
+import type { Task, Status, Developer } from '../../../../types/tasks'
 import { TaskRow } from './TaskRow'
 import type { useTaskStatusManager } from '../hooks/useTaskStatusManager'
 import type { useTaskAssigneeManager } from '../hooks/useTaskAssigneeManager'

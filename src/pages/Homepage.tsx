@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { toast } from 'react-toastify'
-import { TasksPanel } from '../features/tasks/components/TasksPanel'
-import { useTasksOverview } from '../features/tasks/hooks/useTasksOverview'
+import { TasksPanel } from '../features/tasks/list/components/TasksPanel'
+import { useTasksOverview } from '../features/tasks/list/hooks/useTasksOverview'
 import './Homepage.css'
 
 export const Homepage = () => {

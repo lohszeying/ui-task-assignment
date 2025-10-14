@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { statusService } from '../../../services/statuses'
+import { statusService } from '../../../../services/statuses'
 
 export const useStatusesQuery = () => {
   const query = useQuery({

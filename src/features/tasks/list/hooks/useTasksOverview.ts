@@ -1,4 +1,4 @@
-import { normalizeError } from '../../../utils/error'
+import { normalizeError } from '../../../../utils/error'
 import { useTasksQuery } from './useTasksQuery'
 import { useStatusesQuery } from './useStatusesQuery'
 import { useDevelopersQuery } from './useDevelopersQuery'

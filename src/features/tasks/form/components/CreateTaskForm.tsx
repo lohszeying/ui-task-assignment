@@ -1,5 +1,5 @@
 import type { FormEvent } from 'react'
-import type { Skill } from '../../../types/tasks'
+import type { Skill } from '../../../../types/tasks'
 import { TaskFormSection } from './TaskFormSection'
 import type { useCreateTaskForm } from '../hooks/useCreateTaskForm'
 import type { TaskFormSectionForm } from './TaskFormSection.types'
