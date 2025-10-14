@@ -4,15 +4,8 @@ import { TaskFieldMessages } from './TaskFieldMessages'
 const descriptionValidators = {
   onChange: ({ value }: { value: string }) =>
     !value
-      ? 'Task description is required'
-      : value.trim().length < 10
-        ? 'Describe the task in at least 10 characters'
-        : undefined,
+      ? 'Task description is required' : '',
   onChangeAsyncDebounceMs: 500,
-  onChangeAsync: async ({ value }: { value: string }) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    return value.includes('error') ? 'No "error" allowed in description' : undefined
-  },
 }
 
 type TaskDescriptionFieldProps = {
@@ -36,7 +29,7 @@ export const TaskDescriptionField = ({ Field, name, isDisabled }: TaskDescriptio
           <textarea
             id={inputId}
             name={field.name}
-            value={field.state.value}
+            value={field.state.value as string}
             onBlur={field.handleBlur}
             className="task-field__control task-field__control--textarea"
             placeholder="Describe what needs to get done..."
