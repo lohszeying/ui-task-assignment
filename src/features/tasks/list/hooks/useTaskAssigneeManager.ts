@@ -1,6 +1,6 @@
 import { type ChangeEvent, useEffect, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { taskService } from '../../../../services/tasks'
+import { taskService } from '../../../services/tasks.ts'
 import type { Task } from '../../../../types/tasks'
 
 export const useTaskAssigneeManager = (tasks: Task[] | undefined) => {

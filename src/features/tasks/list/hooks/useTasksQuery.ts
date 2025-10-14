@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { taskService } from '../../../../services/tasks'
+import { taskService } from '../../../services/tasks.ts'
 
 export const useTasksQuery = () => {
   const query = useQuery({
