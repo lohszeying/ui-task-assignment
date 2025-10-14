@@ -4,11 +4,7 @@ import type {
   TaskFieldPath,
   TaskFormSectionForm,
 } from './TaskFormSection.types'
-import {
-  createEmptyTaskFormValues,
-  MAX_SUBTASK_DEPTH,
-  type TaskFormValues,
-} from '../utils/taskFormHelpers'
+import { createEmptyTaskFormValues, MAX_SUBTASK_DEPTH } from '../utils/taskFormHelpers'
 
 type TaskSubtasksFieldProps = {
   form: TaskFormSectionForm
@@ -35,7 +31,7 @@ export const TaskSubtasksField = ({
     <Field
       name={name}
       children={(field) => {
-        const subtasks: TaskFormValues[] = Array.isArray(field.state.value)
+        const subtasks = Array.isArray(field.state.value)
           ? field.state.value
           : []
 

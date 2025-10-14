@@ -24,7 +24,7 @@ export const CreateTaskForm = () => {
     form.handleSubmit()
   }
 
-  const sectionFormApi = form as unknown as TaskFormSectionForm
+  const sectionFormApi: TaskFormSectionForm = form
 
   return (
     <form

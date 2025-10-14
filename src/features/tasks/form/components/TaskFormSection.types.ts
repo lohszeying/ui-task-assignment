@@ -1,42 +1,23 @@
-import type { JSX } from 'react'
 import type { Skill } from '../../../../types/tasks'
-import type { TaskFormValues } from '../utils/taskFormHelpers'
+import type { CreateTaskFormApi } from '../hooks/useCreateTaskForm'
 
-export type TaskFieldPath = string
-export type TaskArrayFieldPath = string
+export type TaskFormSectionForm = Pick<CreateTaskFormApi, 'Field' | 'pushFieldValue' | 'deleteField'>
 
-export interface TaskFieldMeta {
-  isTouched: boolean
-  isValid: boolean
-  isValidating: boolean
-  errors: string[]
+type TaskFieldComponentProps = Parameters<TaskFormSectionForm['Field']>[0]
+
+export type TaskFieldPath = Parameters<TaskFormSectionForm['deleteField']>[0]
+export type TaskArrayFieldPath = Parameters<TaskFormSectionForm['pushFieldValue']>[0]
+
+type TaskFieldChildren = TaskFieldComponentProps extends {
+  children: (field: infer TField) => unknown
 }
+  ? TField
+  : never
 
-export interface TaskFieldState<Value> {
-  value: Value
-  meta: TaskFieldMeta
-}
-
-export interface TaskFieldApi<Value = unknown> {
-  name: string
-  state: TaskFieldState<Value>
-  handleBlur: () => void
-  handleChange: (value: Value) => void
-}
-
-export interface TaskFormSectionForm {
-  Field: (props: {
-    name: TaskFieldPath
-    validators?: {
-      onChange?: (args: { value: string }) => string | undefined
-      onChangeAsyncDebounceMs?: number
-      onChangeAsync?: (args: { value: string }) => Promise<string | undefined>
-    }
-    children: (field: TaskFieldApi) => JSX.Element
-  }) => JSX.Element
-  pushFieldValue: (field: TaskArrayFieldPath, value: TaskFormValues) => void
-  deleteField: (field: TaskFieldPath) => void
-}
+export type TaskFieldApi = Pick<
+  TaskFieldChildren,
+  'name' | 'state' | 'handleBlur' | 'handleChange'
+>
 
 export interface TaskFormSectionProps {
   form: TaskFormSectionForm

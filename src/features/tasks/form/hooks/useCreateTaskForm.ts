@@ -47,3 +47,5 @@ export const useCreateTaskForm = () => {
     submissionErrorMessage,
   }
 }
+
+export type CreateTaskFormApi = ReturnType<typeof useCreateTaskForm>['form']
