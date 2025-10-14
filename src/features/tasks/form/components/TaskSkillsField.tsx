@@ -1,7 +1,6 @@
 import type { TaskFieldPath, TaskFormSectionForm } from './TaskFormSection.types'
 import type { Skill } from '../../../../types/tasks'
 import { SkillPill } from '../../../skills/components/SkillPill'
-import { TaskFieldMessages } from './TaskFieldMessages'
 
 type TaskSkillsFieldProps = {
   Field: TaskFormSectionForm['Field']
@@ -72,7 +71,6 @@ export const TaskSkillsField = ({
               )
             })}
           </div>
-          <TaskFieldMessages field={field} />
         </div>
       )
     }}
