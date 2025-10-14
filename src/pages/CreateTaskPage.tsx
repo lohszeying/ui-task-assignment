@@ -5,19 +5,6 @@ import { useCreateTaskForm } from '../features/tasks/form/hooks/useCreateTaskFor
 import './CreateTaskPage.css'
 
 export const CreateTaskPage = () => {
-  const {
-    form,
-    skillsCollections,
-    createTaskMutation,
-    submissionErrorMessage,
-  } = useCreateTaskForm()
-
-  useEffect(() => {
-    if (submissionErrorMessage) {
-      toast.error(submissionErrorMessage)
-    }
-  }, [submissionErrorMessage])
-
   return (
     <section className="create-task-page">
       <div className="create-task-card">
@@ -27,12 +14,7 @@ export const CreateTaskPage = () => {
             Fill out the task details, assign the right skills, and add subtasks if needed.
           </p>
         </header>
-        <CreateTaskForm
-          form={form}
-          skillsCollections={skillsCollections}
-          isMutationPending={createTaskMutation.isPending}
-          isMutationSuccess={createTaskMutation.isSuccess}
-        />
+        <CreateTaskForm />
       </div>
     </section>
   )

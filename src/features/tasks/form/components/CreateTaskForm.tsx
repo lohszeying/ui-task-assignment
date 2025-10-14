@@ -1,30 +1,23 @@
-import type { FormEvent } from 'react'
-import type { Skill } from '../../../../types/tasks'
+import { useEffect, type FormEvent } from 'react'
 import { TaskFormSection } from './TaskFormSection'
-import type { useCreateTaskForm } from '../hooks/useCreateTaskForm'
+import { useCreateTaskForm } from '../hooks/useCreateTaskForm'
 import type { TaskFormSectionForm } from './TaskFormSection.types'
+import { toast } from 'react-toastify'
 
-type TaskFormApi = ReturnType<typeof useCreateTaskForm>['form']
+export const CreateTaskForm = () => {
+  const {
+    form,
+    skillsCollections,
+    createTaskMutation,
+    submissionErrorMessage,
+  } = useCreateTaskForm()
 
-type SkillsCollections = {
-  data: Skill[];
-  isLoading: boolean;
-  errorMessage: string | null;
-}
+  useEffect(() => {
+      if (submissionErrorMessage) {
+        toast.error(submissionErrorMessage)
+      }
+    }, [submissionErrorMessage])
 
-export type CreateTaskFormProps = {
-  form: TaskFormApi
-  skillsCollections: SkillsCollections
-  isMutationPending: boolean
-  isMutationSuccess: boolean
-}
-
-export const CreateTaskForm = ({
-  form,
-  skillsCollections,
-  isMutationPending,
-  isMutationSuccess,
-}: CreateTaskFormProps) => {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     event.stopPropagation()
@@ -41,7 +34,7 @@ export const CreateTaskForm = ({
       <form.Subscribe
         selector={(state) => [state.canSubmit, state.isSubmitting]}
         children={([canSubmit, isSubmitting]) => {
-          const isBusy = isSubmitting || isMutationPending
+          const isBusy = isSubmitting || createTaskMutation.isPending
 
           return (
             <>
@@ -64,7 +57,7 @@ export const CreateTaskForm = ({
                 >
                   {isBusy ? 'Submitting...' : 'Create task'}
                 </button>
-                {isMutationSuccess ? (
+                {createTaskMutation.isSuccess ? (
                   <p role="status" className="create-task-status create-task-status--success">
                     Task created successfully.
                   </p>
