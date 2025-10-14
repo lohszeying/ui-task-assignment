@@ -1,5 +1,5 @@
 import type { TaskFieldPath, TaskFormSectionForm } from './TaskFormSection.types'
-import { TaskFieldMessages } from './TaskFieldMessages'
+import { TaskFieldValidatorMessage } from './TaskFieldValidatorMessage'
 
 const descriptionValidators = {
   onChange: ({ value }: { value: string }) =>
@@ -37,7 +37,7 @@ export const TaskDescriptionField = ({ Field, name, isDisabled }: TaskDescriptio
             disabled={isDisabled}
             onChange={(event) => field.handleChange(event.target.value)}
           />
-          <TaskFieldMessages field={field} />
+          <TaskFieldValidatorMessage field={field} />
         </div>
       )
     }}
