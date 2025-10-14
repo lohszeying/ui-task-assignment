@@ -22,9 +22,7 @@ export const TaskSkillsField = ({
   <Field
     name={name}
     children={(field) => {
-      const selectedSkills: number[] = Array.isArray(field.state.value)
-        ? field.state.value
-        : []
+      const selectedSkills: number[] = field.state.value;
       const groupId = `${field.name.replace(/\./g, '-')}-pill-group`
 
       const toggleSkill = (skillId: number) => {
