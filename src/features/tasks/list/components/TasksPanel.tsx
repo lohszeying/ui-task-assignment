@@ -1,5 +1,6 @@
 import type { JSX } from 'react'
 import { TaskRow } from './TaskRow'
+import { normalizeError } from '../../../../utils/error'
 import type { useTaskStatusManager } from '../hooks/useTaskStatusManager'
 import type { useTaskAssigneeManager } from '../hooks/useTaskAssigneeManager'
 import type { useTasksQuery } from '../hooks/useTasksQuery'
@@ -49,11 +50,7 @@ export const TasksPanel = ({
   taskAssigneeManager,
 }: TasksPanelProps) => {
   const hasTasks = tasksQuery.tasks.length > 0
-  const tasksErrorMessage = tasksQuery.error instanceof Error
-    ? tasksQuery.error.message
-    : tasksQuery.error
-    ? 'Unknown error'
-    : null
+  const tasksErrorMessage = normalizeError(tasksQuery.error, 'Unknown error')
 
   const renderTasks = () => (
     <div className="tasks-list">
