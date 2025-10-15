@@ -17,8 +17,12 @@ class TaskService {
   }
 
   public updateTaskStatus = async (taskId: string, statusId: string) => {
+    const statusIdNumber = parseInt(statusId, 10)
+    if (isNaN(statusIdNumber)) {
+      throw new Error(`Invalid statusId: ${statusId}`)
+    }
     await httpClient.patch(this.baseUrl, `${TASKS_ENDPOINT}/${taskId}/status`, {
-      body: { statusId: Number(statusId) },
+      body: { statusId: statusIdNumber },
     })
   }
 
