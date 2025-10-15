@@ -12,8 +12,8 @@ class TaskService {
   }
 
   public getAllTasks = async () => {
-    const response = await httpClient.get(this.baseUrl, TASKS_ENDPOINT)
-    return response.data as Task[]
+    const response = await httpClient.get<Task[]>(this.baseUrl, TASKS_ENDPOINT)
+    return response.data
   }
 
   public updateTaskStatus = async (taskId: string, statusId: number) => {

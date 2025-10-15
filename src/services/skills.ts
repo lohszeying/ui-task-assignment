@@ -12,8 +12,8 @@ class SkillsService {
   }
 
   public getSkills = async (): Promise<Skill[]> => {
-    const response = await httpClient.get(this.baseUrl, SKILLS_ENDPOINT)
-    return response.data as Skill[]
+    const response = await httpClient.get<Skill[]>(this.baseUrl, SKILLS_ENDPOINT)
+    return response.data
   }
 }
 

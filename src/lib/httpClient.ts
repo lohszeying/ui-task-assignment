@@ -7,8 +7,8 @@ export type RequestOptions = {
   signal?: AbortSignal
 }
 
-export type HttpResponse = {
-  data: unknown
+export type HttpResponse<T = unknown> = {
+  data: T
   status: number
 }
 
@@ -44,12 +44,12 @@ const parseJson = async (response: Response) => {
   }
 }
 
-const request = async (
+const request = async <T = unknown>(
   method: HttpMethod,
   baseUrl: string,
   path: string,
   options: RequestOptions = {},
-) => {
+): Promise<HttpResponse<T>> => {
   const { params, body, headers, signal } = options
 
   const response = await fetch(buildUrl(path, baseUrl, params), {
@@ -74,20 +74,20 @@ const request = async (
   }
 
   return {
-    data,
+    data: data as T,
     status: response.status,
-  } as HttpResponse
+  }
 }
 
 export const httpClient = {
-  get: (baseUrl: string, path: string,  options?: RequestOptions) =>
-    request('GET', baseUrl, path, options),
-  post: (baseUrl: string, path: string, options?: RequestOptions) =>
-    request('POST', baseUrl, path, options),
-  put: (baseUrl: string, path: string, options?: RequestOptions) =>
-    request('PUT', baseUrl, path, options),
-  patch: (baseUrl: string, path: string, options?: RequestOptions) => 
-    request('PATCH', baseUrl, path, options),
-  delete: (baseUrl: string, path: string, options?: RequestOptions) =>
-    request('DELETE', baseUrl, path, options),
+  get: <T = unknown>(baseUrl: string, path: string, options?: RequestOptions) =>
+    request<T>('GET', baseUrl, path, options),
+  post: <T = unknown>(baseUrl: string, path: string, options?: RequestOptions) =>
+    request<T>('POST', baseUrl, path, options),
+  put: <T = unknown>(baseUrl: string, path: string, options?: RequestOptions) =>
+    request<T>('PUT', baseUrl, path, options),
+  patch: <T = unknown>(baseUrl: string, path: string, options?: RequestOptions) =>
+    request<T>('PATCH', baseUrl, path, options),
+  delete: <T = unknown>(baseUrl: string, path: string, options?: RequestOptions) =>
+    request<T>('DELETE', baseUrl, path, options),
 }

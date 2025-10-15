@@ -12,8 +12,8 @@ class StatusService {
   }
 
   public getAllStatuses = async () => {
-    const response = await httpClient.get(this.baseUrl, STATUSES_ENDPOINT)
-    return (response.data as Status[]) ?? []
+    const response = await httpClient.get<Status[]>(this.baseUrl, STATUSES_ENDPOINT)
+    return response.data ?? []
   }
 }
 

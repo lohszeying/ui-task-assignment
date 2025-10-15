@@ -14,11 +14,11 @@ class DeveloperService {
   public getDevelopers = async (skillIds?: number[]) => {
     const params = skillIds && skillIds.length > 0 ? { skill: skillIds.join(',') } : undefined
 
-    const response = await httpClient.get(this.baseUrl, DEVELOPERS_ENDPOINT, {
+    const response = await httpClient.get<Developer[]>(this.baseUrl, DEVELOPERS_ENDPOINT, {
       params,
     })
 
-    return (response.data as Developer[]) ?? []
+    return response.data ?? []
   }
 }
 
