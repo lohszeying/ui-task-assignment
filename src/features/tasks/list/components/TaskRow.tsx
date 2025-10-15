@@ -37,6 +37,9 @@ export const TaskRow = ({
   statusesLoading,
   developersLoading,
 }: TaskRowProps) => {
+  const currentStatusId = task.status?.statusId ? String(task.status.statusId) : ''
+  const currentDeveloperId = task.developer?.developerId ?? 'unassigned'
+
   const updateStatusMutation = useTaskMutation({
     mutationFn: ({ taskId, statusId }: { taskId: string; statusId: string }) =>
       taskService.updateTaskStatus(taskId, statusId),
@@ -70,7 +73,6 @@ export const TaskRow = ({
 
   const handleStatusChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const nextStatusId = event.target.value
-    const currentStatusId = task.status?.statusId ? String(task.status.statusId) : ''
 
     if (nextStatusId === currentStatusId || !nextStatusId) return
 
@@ -79,7 +81,6 @@ export const TaskRow = ({
 
   const handleAssigneeChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const nextDeveloperId = event.target.value
-    const currentDeveloperId = task.developer?.developerId ?? 'unassigned'
 
     if (nextDeveloperId === currentDeveloperId || !nextDeveloperId) return
 
@@ -90,7 +91,6 @@ export const TaskRow = ({
   }
 
   const availableDevelopers = filterDevelopersBySkills(developers, task.skills)
-  const currentStatusId = task.status?.statusId ? String(task.status.statusId) : ''
   const currentAssigneeId = task.developer?.developerId ?? 'unassigned'
   const isStatusDisabled = statuses.length === 0 || statusesLoading || updateStatusMutation.isPending
   const isAssigneeDisabled = developersLoading || updateAssigneeMutation.isPending
