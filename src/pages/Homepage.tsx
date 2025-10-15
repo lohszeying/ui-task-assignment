@@ -3,8 +3,7 @@ import { useTasksOverview } from '../features/tasks/list/hooks/useTasksOverview'
 import './Homepage.css'
 
 export const Homepage = () => {
-  const { tasksQuery, statusesQuery, developersQuery, taskStatusManager, taskAssigneeManager } =
-    useTasksOverview()
+  const { tasksQuery, statusesQuery, developersQuery } = useTasksOverview()
 
   return (
     <section className="homepage">
@@ -12,8 +11,6 @@ export const Homepage = () => {
         tasksQuery={tasksQuery}
         statusesQuery={statusesQuery}
         developersQuery={developersQuery}
-        taskStatusManager={taskStatusManager}
-        taskAssigneeManager={taskAssigneeManager}
       />
     </section>
   )

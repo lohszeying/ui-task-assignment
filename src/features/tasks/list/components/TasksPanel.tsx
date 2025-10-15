@@ -1,14 +1,10 @@
 import type { JSX } from 'react'
 import { TaskRow } from './TaskRow'
 import { normalizeError } from '../../../../utils/error'
-import type { useTaskStatusManager } from '../hooks/useTaskStatusManager'
-import type { useTaskAssigneeManager } from '../hooks/useTaskAssigneeManager'
 import type { useTasksQuery } from '../hooks/useTasksQuery'
 import type { useStatusesQuery } from '../hooks/useStatusesQuery'
 import type { useDevelopersQuery } from '../hooks/useDevelopersQuery'
 
-type TaskStatusManager = ReturnType<typeof useTaskStatusManager>
-type TaskAssigneeManager = ReturnType<typeof useTaskAssigneeManager>
 type TasksQuery = ReturnType<typeof useTasksQuery>
 type StatusesQuery = ReturnType<typeof useStatusesQuery>
 type DevelopersQuery = ReturnType<typeof useDevelopersQuery>
@@ -18,8 +14,6 @@ export type TasksPanelProps = {
   tasksQuery: TasksQuery
   statusesQuery: StatusesQuery
   developersQuery: DevelopersQuery
-  taskStatusManager: TaskStatusManager
-  taskAssigneeManager: TaskAssigneeManager
 }
 
 const LoadingState = () => (
@@ -46,38 +40,22 @@ export const TasksPanel = ({
   tasksQuery,
   statusesQuery,
   developersQuery,
-  taskStatusManager,
-  taskAssigneeManager,
 }: TasksPanelProps) => {
   const hasTasks = tasksQuery.tasks.length > 0
   const tasksErrorMessage = normalizeError(tasksQuery.error, 'Unknown error')
 
   const renderTasks = () => (
     <div className="tasks-list">
-      {tasksQuery.tasks.map((task) => {
-        return (
-          <TaskRow
-            key={task.taskId}
-            task={task}
-            statuses={statusesQuery.statuses}
-            developers={developersQuery.developers}
-            statusControls={{
-              valueFor: taskStatusManager.getStatusValue,
-              onChange: taskStatusManager.handleStatusChange,
-              pendingTaskId: taskStatusManager.pendingTaskId,
-              isUpdating: taskStatusManager.isUpdating,
-              statusesLoading: statusesQuery.isLoading,
-            }}
-            assigneeControls={{
-              valueFor: taskAssigneeManager.getAssigneeValue,
-              onChange: taskAssigneeManager.handleAssigneeChange,
-              pendingTaskId: taskAssigneeManager.pendingTaskId,
-              isUpdating: taskAssigneeManager.isUpdating,
-              developersLoading: developersQuery.isLoading,
-            }}
-          />
-        )
-      })}
+      {tasksQuery.tasks.map((task) => (
+        <TaskRow
+          key={task.taskId}
+          task={task}
+          statuses={statusesQuery.statuses}
+          developers={developersQuery.developers}
+          statusesLoading={statusesQuery.isLoading}
+          developersLoading={developersQuery.isLoading}
+        />
+      ))}
     </div>
   )
 

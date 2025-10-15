@@ -1,5 +1,8 @@
-import type { ChangeEvent } from 'react'
+import { type ChangeEvent, useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'react-toastify'
 import type { Task, Skill, Status, Developer } from '../../../../types/tasks'
+import { taskService } from '../../../../services/tasks'
 import { TaskSelectControl } from './TaskSelectControl'
 import './TaskRow.css'
 
@@ -84,40 +87,130 @@ export type TaskRowProps = {
   task: Task
   statuses: Status[]
   developers: Developer[]
-  statusControls: {
-    valueFor: (task: Task) => string
-    onChange: (task: Task) => (event: ChangeEvent<HTMLSelectElement>) => void
-    pendingTaskId: string | null
-    isUpdating: boolean
-    statusesLoading: boolean
-  }
-  assigneeControls: {
-    valueFor: (task: Task) => string
-    onChange: (task: Task) => (event: ChangeEvent<HTMLSelectElement>) => void
-    pendingTaskId: string | null
-    isUpdating: boolean
-    developersLoading: boolean
-  }
+  statusesLoading: boolean
+  developersLoading: boolean
 }
 
 export const TaskRow = ({
   task,
   statuses,
   developers,
-  statusControls,
-  assigneeControls,
+  statusesLoading,
+  developersLoading,
 }: TaskRowProps) => {
+  const queryClient = useQueryClient()
+  const [pendingOperation, setPendingOperation] = useState<'status' | 'assignee' | null>(null)
+
+  // Status mutation
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ taskId, statusId }: { taskId: string; statusId: string }) =>
+      taskService.updateTaskStatus(taskId, statusId),
+    onMutate: async ({ taskId, statusId }) => {
+      setPendingOperation('status')
+      await queryClient.cancelQueries({ queryKey: ['tasks'] })
+
+      const previousTasks = queryClient.getQueryData<Task[]>(['tasks'])
+
+      queryClient.setQueryData<Task[]>(['tasks'], (old) => {
+        if (!old) return old
+        return old.map((t) =>
+          t.taskId === taskId
+            ? { ...t, status: statuses.find((s) => String(s.statusId) === statusId) }
+            : t
+        )
+      })
+
+      return { previousTasks }
+    },
+    onError: (error, _variables, context) => {
+      if (context?.previousTasks) {
+        queryClient.setQueryData(['tasks'], context.previousTasks)
+      }
+      const message = error instanceof Error ? error.message : 'Failed to update task status.'
+      toast.error(message)
+    },
+    onSettled: () => {
+      setPendingOperation(null)
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+    },
+  })
+
+  // Assignee mutation (handles both assign and unassign)
+  const updateAssigneeMutation = useMutation({
+    mutationFn: ({ taskId, developerId }: { taskId: string; developerId: string | null }) =>
+      developerId
+        ? taskService.updateTaskDeveloper(taskId, developerId)
+        : taskService.unassignTaskDeveloper(taskId),
+    onMutate: async ({ taskId, developerId }) => {
+      setPendingOperation('assignee')
+      await queryClient.cancelQueries({ queryKey: ['tasks'] })
+
+      const previousTasks = queryClient.getQueryData<Task[]>(['tasks'])
+
+      queryClient.setQueryData<Task[]>(['tasks'], (old) => {
+        if (!old) return old
+        return old.map((t) =>
+          t.taskId === taskId
+            ? {
+                ...t,
+                developer: developerId
+                  ? developers.find((d) => d.developerId === developerId)
+                  : undefined
+              }
+            : t
+        )
+      })
+
+      return { previousTasks }
+    },
+    onError: (error, _variables, context) => {
+      if (context?.previousTasks) {
+        queryClient.setQueryData(['tasks'], context.previousTasks)
+      }
+      const message = error instanceof Error ? error.message : 'Failed to update assignee.'
+      toast.error(message)
+    },
+    onSettled: () => {
+      setPendingOperation(null)
+      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+    },
+  })
+
+  const handleStatusChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const nextStatusId = event.target.value
+    const currentStatusId = task.status?.statusId ? String(task.status.statusId) : ''
+
+    if (nextStatusId === currentStatusId || !nextStatusId) return
+
+    const selectedStatus = statuses.find((s) => String(s.statusId) === nextStatusId)
+    if (!selectedStatus) {
+      toast.error('Selected status is not available.')
+      return
+    }
+
+    updateStatusMutation.mutate({ taskId: task.taskId, statusId: nextStatusId })
+  }
+
+  const handleAssigneeChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const nextDeveloperId = event.target.value
+    const currentDeveloperId = task.developer?.developerId ?? 'unassigned'
+
+    if (nextDeveloperId === currentDeveloperId || !nextDeveloperId) return
+
+    updateAssigneeMutation.mutate({
+      taskId: task.taskId,
+      developerId: nextDeveloperId === 'unassigned' ? null : nextDeveloperId
+    })
+  }
+
   const availableDevelopers = filterDevelopersBySkills(developers, task.skills)
-  const currentStatusId = statusControls.valueFor(task)
-  const currentAssigneeId = assigneeControls.valueFor(task)
-  const isStatusUpdatingThisTask =
-    statusControls.pendingTaskId === task.taskId && statusControls.isUpdating
-  const isAssigneeUpdatingThisTask =
-    assigneeControls.pendingTaskId === task.taskId && assigneeControls.isUpdating
-  const isStatusDisabled =
-    statuses.length === 0 || statusControls.statusesLoading || isStatusUpdatingThisTask
-  const isAssigneeDisabled = assigneeControls.developersLoading || isAssigneeUpdatingThisTask
-  const isRowBusy = isStatusUpdatingThisTask || isAssigneeUpdatingThisTask
+  const currentStatusId = task.status?.statusId ? String(task.status.statusId) : ''
+  const currentAssigneeId = task.developer?.developerId ?? 'unassigned'
+  const isStatusUpdating = pendingOperation === 'status' && updateStatusMutation.isPending
+  const isAssigneeUpdating = pendingOperation === 'assignee' && updateAssigneeMutation.isPending
+  const isStatusDisabled = statuses.length === 0 || statusesLoading || isStatusUpdating
+  const isAssigneeDisabled = developersLoading || isAssigneeUpdating
+  const isRowBusy = isStatusUpdating || isAssigneeUpdating
 
   return (
     <article className={`task-card${isRowBusy ? ' task-card--busy' : ''}`} aria-busy={isRowBusy}>
@@ -136,17 +229,17 @@ export const TaskRow = ({
           label="Status"
           id={`status-${task.taskId}`}
           value={currentStatusId}
-          onChange={statusControls.onChange(task)}
+          onChange={handleStatusChange}
           disabled={isStatusDisabled}
         >
           {buildStatusDropdownOptions(statuses, task.status)}
         </TaskSelectControl>
-        
+
         <TaskSelectControl
           label="Assignee"
           id={`assignee-${task.taskId}`}
           value={currentAssigneeId}
-          onChange={assigneeControls.onChange(task)}
+          onChange={handleAssigneeChange}
           disabled={isAssigneeDisabled}
         >
           {buildAssigneeDropdownOptions(availableDevelopers, task.developer)}
