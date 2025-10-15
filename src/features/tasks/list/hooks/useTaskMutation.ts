@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import type { Task } from '../../../../types/tasks'
@@ -22,12 +21,10 @@ export const useTaskMutation = <TVariables,>({
   errorMessage,
 }: UseTaskMutationOptions<TVariables>) => {
   const queryClient = useQueryClient()
-  const [isPending, setIsPending] = useState(false)
 
   const mutation = useMutation({
     mutationFn,
     onMutate: async (variables) => {
-      setIsPending(true)
       await queryClient.cancelQueries({ queryKey: ['tasks'] })
 
       const previousTasks = queryClient.getQueryData<Task[]>(['tasks'])
@@ -47,10 +44,9 @@ export const useTaskMutation = <TVariables,>({
       toast.error(message)
     },
     onSettled: () => {
-      setIsPending(false)
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
     },
   })
 
-  return { mutation, isPending }
+  return mutation
 }

@@ -43,7 +43,7 @@ export const TaskRow = ({
   statusesLoading,
   developersLoading,
 }: TaskRowProps) => {
-  const { mutation: updateStatusMutation, isPending: isStatusPending } = useTaskMutation({
+  const updateStatusMutation = useTaskMutation({
     mutationFn: ({ taskId, statusId }: { taskId: string; statusId: string }) =>
       taskService.updateTaskStatus(taskId, statusId),
     optimisticUpdate: (tasks, { taskId, statusId }) =>
@@ -55,7 +55,7 @@ export const TaskRow = ({
     errorMessage: 'Failed to update task status.',
   })
 
-  const { mutation: updateAssigneeMutation, isPending: isAssigneePending } = useTaskMutation({
+  const updateAssigneeMutation = useTaskMutation({
     mutationFn: ({ taskId, developerId }: { taskId: string; developerId: string | null }) =>
       developerId
         ? taskService.updateTaskDeveloper(taskId, developerId)
@@ -104,9 +104,9 @@ export const TaskRow = ({
   const availableDevelopers = filterDevelopersBySkills(developers, task.skills)
   const currentStatusId = task.status?.statusId ? String(task.status.statusId) : ''
   const currentAssigneeId = task.developer?.developerId ?? 'unassigned'
-  const isStatusDisabled = statuses.length === 0 || statusesLoading || isStatusPending
-  const isAssigneeDisabled = developersLoading || isAssigneePending
-  const isRowBusy = isStatusPending || isAssigneePending
+  const isStatusDisabled = statuses.length === 0 || statusesLoading || updateStatusMutation.isPending
+  const isAssigneeDisabled = developersLoading || updateAssigneeMutation.isPending
+  const isRowBusy = updateStatusMutation.isPending || updateAssigneeMutation.isPending
 
   const statusInList = statuses.some((s) => String(s.statusId) === currentStatusId)
   const assigneeInList = task.developer
