@@ -13,8 +13,7 @@ export const useTasksOverview = () => {
   const taskStatusManager = useTaskStatusManager(tasksQuery.tasks, statusesQuery.statuses)
   const taskAssigneeManager = useTaskAssigneeManager(tasksQuery.tasks)
 
-  const tasksErrorMessage =
-    normalizeError(tasksQuery.error) ?? (tasksQuery.error ? 'Unknown error' : null)
+  const tasksErrorMessage = normalizeError(tasksQuery.error, 'Unknown error')
   const statusUpdateErrorMessage = normalizeError(taskStatusManager.error)
   const assigneeUpdateErrorMessage = normalizeError(taskAssigneeManager.error)
 
