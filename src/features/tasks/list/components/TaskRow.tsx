@@ -80,12 +80,6 @@ export const TaskRow = ({
 
     if (nextStatusId === currentStatusId || !nextStatusId) return
 
-    const selectedStatus = statuses.find((s) => String(s.statusId) === nextStatusId)
-    if (!selectedStatus) {
-      toast.error('Selected status is not available.')
-      return
-    }
-
     updateStatusMutation.mutate({ taskId: task.taskId, statusId: nextStatusId })
   }
 
