@@ -21,7 +21,7 @@ const buildTask = (overrides: Partial<Task> = {}): Task => ({
 const updateTaskDeveloperMock = vi.hoisted(() => vi.fn())
 const unassignTaskDeveloperMock = vi.hoisted(() => vi.fn())
 
-vi.mock('../../../../services/tasks', () => ({
+vi.mock('../../../../../services/tasks', () => ({
   taskService: {
     updateTaskDeveloper: (...args: unknown[]) => updateTaskDeveloperMock(...args),
     unassignTaskDeveloper: (...args: unknown[]) => unassignTaskDeveloperMock(...args),
