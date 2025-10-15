@@ -37,16 +37,16 @@ export const TaskRow = ({
   statusesLoading,
   developersLoading,
 }: TaskRowProps) => {
-  const currentStatusId = task.status?.statusId ? String(task.status.statusId) : ''
+  const currentStatusId = task.status?.statusId
   const currentDeveloperId = task.developer?.developerId ?? 'unassigned'
 
   const updateStatusMutation = useTaskMutation({
-    mutationFn: ({ taskId, statusId }: { taskId: string; statusId: string }) =>
+    mutationFn: ({ taskId, statusId }: { taskId: string; statusId: number }) =>
       taskService.updateTaskStatus(taskId, statusId),
     optimisticUpdate: (tasks, { taskId, statusId }) =>
       tasks.map((t) =>
         t.taskId === taskId
-          ? { ...t, status: statuses.find((s) => String(s.statusId) === statusId) }
+          ? { ...t, status: statuses.find((s) => s.statusId === statusId) }
           : t
       ),
     errorMessage: 'Failed to update task status.',
@@ -72,9 +72,9 @@ export const TaskRow = ({
   })
 
   const handleStatusChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const nextStatusId = event.target.value
+    const nextStatusId = parseInt(event.target.value, 10)
 
-    if (nextStatusId === currentStatusId || !nextStatusId) return
+    if (isNaN(nextStatusId) || nextStatusId === currentStatusId) return
 
     updateStatusMutation.mutate({ taskId: task.taskId, statusId: nextStatusId })
   }
@@ -96,7 +96,7 @@ export const TaskRow = ({
   const isAssigneeDisabled = developersLoading || updateAssigneeMutation.isPending
   const isRowBusy = updateStatusMutation.isPending || updateAssigneeMutation.isPending
 
-  const statusInList = statuses.some((s) => String(s.statusId) === currentStatusId)
+  const statusInList = currentStatusId !== undefined && statuses.some((s) => s.statusId === currentStatusId)
   const assigneeInList = task.developer
     ? availableDevelopers.some((d) => d.developerId === task.developer?.developerId)
     : true
@@ -117,16 +117,16 @@ export const TaskRow = ({
         <TaskSelectControl
           label="Status"
           id={`status-${task.taskId}`}
-          value={currentStatusId}
+          value={currentStatusId ?? ''}
           onChange={handleStatusChange}
           disabled={isStatusDisabled}
         >
           <option value="">Select status</option>
           {!statusInList && task.status && (
-            <option value={currentStatusId}>{task.status.statusName}</option>
+            <option value={task.status.statusId}>{task.status.statusName}</option>
           )}
           {statuses.map((status) => (
-            <option key={status.statusId} value={String(status.statusId)}>
+            <option key={status.statusId} value={status.statusId}>
               {status.statusName}
             </option>
           ))}

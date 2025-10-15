@@ -3,7 +3,7 @@ import type { ChangeEvent, ReactNode } from "react"
 type TaskSelectControlProps = {
   label: string
   id: string
-  value: string
+  value: string | number
   onChange: (event: ChangeEvent<HTMLSelectElement>) => void
   disabled: boolean
   children: ReactNode

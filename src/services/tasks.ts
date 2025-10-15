@@ -16,13 +16,9 @@ class TaskService {
     return response.data as Task[]
   }
 
-  public updateTaskStatus = async (taskId: string, statusId: string) => {
-    const statusIdNumber = parseInt(statusId, 10)
-    if (isNaN(statusIdNumber)) {
-      throw new Error(`Invalid statusId: ${statusId}`)
-    }
+  public updateTaskStatus = async (taskId: string, statusId: number) => {
     await httpClient.patch(this.baseUrl, `${TASKS_ENDPOINT}/${taskId}/status`, {
-      body: { statusId: statusIdNumber },
+      body: { statusId },
     })
   }
 
