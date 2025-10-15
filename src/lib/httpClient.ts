@@ -31,15 +31,9 @@ const buildUrl = (path: string, baseUrl: string, params?: RequestOptions['params
 }
 
 const parseJson = async (response: Response) => {
-  const contentType = response.headers.get('content-type') ?? ''
-  if (!contentType.includes('application/json')) {
-    return undefined
-  }
-
   try {
     return await response.json()
-  } catch (error) {
-    console.warn('Failed to parse JSON response', error)
+  } catch {
     return undefined
   }
 }
