@@ -33,11 +33,6 @@ export const useCreateTaskForm = () => {
     'Unable to load skills. Please try again later.',
   )
 
-  const submissionErrorMessage = normalizeError(
-    createTaskMutation.error,
-    'Failed to create task.',
-  )
-
   return {
     form,
     skillsCollections: {
@@ -46,7 +41,6 @@ export const useCreateTaskForm = () => {
       errorMessage: skillsErrorMessage,
     },
     createTaskMutation,
-    submissionErrorMessage,
   }
 }
 

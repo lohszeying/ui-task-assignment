@@ -1,7 +1,7 @@
 import type { JSX } from 'react'
 import type { TaskFormSectionProps } from '../TaskFormSection.types'
 import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 
 const toastErrorMock = vi.hoisted(() => vi.fn())
 
@@ -56,7 +56,6 @@ const setUseCreateTaskFormReturn = ({
   subscribeState,
   createTaskMutation,
   skillsCollections,
-  submissionErrorMessage,
 }: {
   subscribeState?: SubscribeState
   createTaskMutation?: { isPending?: boolean; isSuccess?: boolean }
@@ -65,7 +64,6 @@ const setUseCreateTaskFormReturn = ({
     isLoading?: boolean
     errorMessage?: string | null
   }
-  submissionErrorMessage?: string | null
 } = {}) => {
   useCreateTaskFormSpy.mockReturnValue({
     form: {
@@ -83,7 +81,6 @@ const setUseCreateTaskFormReturn = ({
       isSuccess: false,
       ...createTaskMutation,
     },
-    submissionErrorMessage: submissionErrorMessage ?? null,
   })
 }
 
@@ -142,17 +139,5 @@ describe('CreateTaskForm', () => {
     render(<CreateTaskForm />)
 
     expect(screen.getByRole('status')).toHaveTextContent('Task created successfully.')
-  })
-
-  it('displays a toast when a submission error message is provided', async () => {
-    setUseCreateTaskFormReturn({
-      submissionErrorMessage: 'Failed to create task.',
-    })
-
-    render(<CreateTaskForm />)
-
-    await waitFor(() => {
-      expect(toastErrorMock).toHaveBeenCalledWith('Failed to create task.')
-    })
   })
 })

@@ -1,30 +1,19 @@
-import { useEffect, type FormEvent } from 'react'
+import { type FormEvent } from 'react'
 import { TaskFormSection } from './TaskFormSection'
 import { useCreateTaskForm } from '../hooks/useCreateTaskForm'
-import type { TaskFormSectionForm } from './TaskFormSection.types'
-import { toast } from 'react-toastify'
 
 export const CreateTaskForm = () => {
   const {
     form,
     skillsCollections,
     createTaskMutation,
-    submissionErrorMessage,
   } = useCreateTaskForm()
-
-  useEffect(() => {
-      if (submissionErrorMessage) {
-        toast.error(submissionErrorMessage)
-      }
-    }, [submissionErrorMessage])
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     event.stopPropagation()
     form.handleSubmit()
   }
-
-  const sectionFormApi: TaskFormSectionForm = form
 
   return (
     <form
@@ -40,7 +29,7 @@ export const CreateTaskForm = () => {
             <>
               <div className="create-task-form__body" aria-busy={isBusy} aria-disabled={isBusy}>
                 <TaskFormSection
-                  form={sectionFormApi}
+                  form={form}
                   fieldPath={null}
                   depth={0}
                   availableSkills={skillsCollections.data}
