@@ -12,17 +12,12 @@ const formatSkills = (skills?: Skill[]) => {
 }
 
 const filterDevelopersBySkills = (developers: Developer[], skills?: Skill[]) => {
-  const requiredSkillIds = new Set(
-    skills?.map((skill) => skill.skillId).filter((id): id is number => typeof id === 'number') ?? []
-  )
+  if (!skills?.length) return developers
 
-  if (requiredSkillIds.size === 0) return developers
-
-  return developers.filter((developer) => {
-    const developerSkillIds = new Set(
-      developer.skills?.map((skill) => skill.skillId).filter((id): id is number => typeof id === 'number') ?? []
-    )
-    return [...requiredSkillIds].every((skillId) => developerSkillIds.has(skillId))
+  const required = new Set(skills.map(s => s.skillId))
+  return developers.filter(dev => {
+    const has = new Set(dev.skills?.map(s => s.skillId))
+    return [...required].every(id => has.has(id))
   })
 }
 
