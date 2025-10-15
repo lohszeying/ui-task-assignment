@@ -37,9 +37,9 @@ describe('TasksPanel', () => {
   it('shows a loading indicator while tasks are loading', () => {
     render(
       <TasksPanel
-        tasksCollections={{ data: [], isLoading: true, errorMessage: null }}
-        statusesCollections={{ data: [], isLoading: false }}
-        developersCollections={{ data: [], isLoading: false }}
+        tasksQuery={{ tasks: [], isLoading: true, error: null }}
+        statusesQuery={{ statuses: [], isLoading: false, error: null }}
+        developersQuery={{ developers: [], isLoading: false, error: null }}
         taskStatusManager={defaultStatusManager()}
         taskAssigneeManager={defaultAssigneeManager()}
       />,
@@ -52,9 +52,9 @@ describe('TasksPanel', () => {
   it('presents an error message when loading fails', () => {
     render(
       <TasksPanel
-        tasksCollections={{ data: [], isLoading: false, errorMessage: 'Network error' }}
-        statusesCollections={{ data: [], isLoading: false }}
-        developersCollections={{ data: [], isLoading: false }}
+        tasksQuery={{ tasks: [], isLoading: false, error: new Error('Network error') }}
+        statusesQuery={{ statuses: [], isLoading: false, error: null }}
+        developersQuery={{ developers: [], isLoading: false, error: null }}
         taskStatusManager={defaultStatusManager()}
         taskAssigneeManager={defaultAssigneeManager()}
       />,
@@ -67,9 +67,9 @@ describe('TasksPanel', () => {
   it('renders the empty state when there are no tasks', () => {
     render(
       <TasksPanel
-        tasksCollections={{ data: [], isLoading: false, errorMessage: null }}
-        statusesCollections={{ data: [], isLoading: false }}
-        developersCollections={{ data: [], isLoading: false }}
+        tasksQuery={{ tasks: [], isLoading: false, error: null }}
+        statusesQuery={{ statuses: [], isLoading: false, error: null }}
+        developersQuery={{ developers: [], isLoading: false, error: null }}
         taskStatusManager={defaultStatusManager()}
         taskAssigneeManager={defaultAssigneeManager()}
       />,
@@ -127,9 +127,9 @@ describe('TasksPanel', () => {
     render(
       <TasksPanel
         title="Engineering Tasks"
-        tasksCollections={{ data: tasks, isLoading: false, errorMessage: null }}
-        statusesCollections={{ data: statuses, isLoading: false }}
-        developersCollections={{ data: developers, isLoading: false }}
+        tasksQuery={{ tasks, isLoading: false, error: null }}
+        statusesQuery={{ statuses, isLoading: false, error: null }}
+        developersQuery={{ developers, isLoading: false, error: null }}
         taskStatusManager={taskStatusManager}
         taskAssigneeManager={taskAssigneeManager}
       />,

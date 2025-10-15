@@ -1,33 +1,22 @@
 import type { JSX } from 'react'
-import type { Task, Status, Developer } from '../../../../types/tasks'
 import { TaskRow } from './TaskRow'
 import type { useTaskStatusManager } from '../hooks/useTaskStatusManager'
 import type { useTaskAssigneeManager } from '../hooks/useTaskAssigneeManager'
+import type { useTasksQuery } from '../hooks/useTasksQuery'
+import type { useStatusesQuery } from '../hooks/useStatusesQuery'
+import type { useDevelopersQuery } from '../hooks/useDevelopersQuery'
 
 type TaskStatusManager = ReturnType<typeof useTaskStatusManager>
 type TaskAssigneeManager = ReturnType<typeof useTaskAssigneeManager>
-
-type TasksCollections = {
-  data: Task[];
-  isLoading: boolean;
-  errorMessage: string | null;
-}
-
-type StatusesCollections = {
-  data: Status[];
-  isLoading: boolean;
-}
-
-type DevelopersCollections = {
-  data: Developer[];
-  isLoading: boolean;
-}
+type TasksQuery = ReturnType<typeof useTasksQuery>
+type StatusesQuery = ReturnType<typeof useStatusesQuery>
+type DevelopersQuery = ReturnType<typeof useDevelopersQuery>
 
 export type TasksPanelProps = {
   title?: string
-  tasksCollections: TasksCollections
-  statusesCollections: StatusesCollections
-  developersCollections: DevelopersCollections
+  tasksQuery: TasksQuery
+  statusesQuery: StatusesQuery
+  developersQuery: DevelopersQuery
   taskStatusManager: TaskStatusManager
   taskAssigneeManager: TaskAssigneeManager
 }
@@ -53,36 +42,41 @@ const EmptyState = () => (
 
 export const TasksPanel = ({
   title = 'Task List',
-  tasksCollections,
-  statusesCollections,
-  developersCollections,
+  tasksQuery,
+  statusesQuery,
+  developersQuery,
   taskStatusManager,
   taskAssigneeManager,
 }: TasksPanelProps) => {
-  const hasTasks = tasksCollections.data.length > 0
+  const hasTasks = tasksQuery.tasks.length > 0
+  const tasksErrorMessage = tasksQuery.error instanceof Error
+    ? tasksQuery.error.message
+    : tasksQuery.error
+    ? 'Unknown error'
+    : null
 
   const renderTasks = () => (
     <div className="tasks-list">
-      {tasksCollections.data.map((task) => {
+      {tasksQuery.tasks.map((task) => {
         return (
           <TaskRow
             key={task.taskId}
             task={task}
-            statuses={statusesCollections.data}
-            developers={developersCollections.data}
+            statuses={statusesQuery.statuses}
+            developers={developersQuery.developers}
             statusControls={{
               valueFor: taskStatusManager.getStatusValue,
               onChange: taskStatusManager.handleStatusChange,
               pendingTaskId: taskStatusManager.pendingTaskId,
               isUpdating: taskStatusManager.isUpdating,
-              statusesLoading: statusesCollections.isLoading,
+              statusesLoading: statusesQuery.isLoading,
             }}
             assigneeControls={{
               valueFor: taskAssigneeManager.getAssigneeValue,
               onChange: taskAssigneeManager.handleAssigneeChange,
               pendingTaskId: taskAssigneeManager.pendingTaskId,
               isUpdating: taskAssigneeManager.isUpdating,
-              developersLoading: developersCollections.isLoading,
+              developersLoading: developersQuery.isLoading,
             }}
           />
         )
@@ -92,10 +86,10 @@ export const TasksPanel = ({
 
   let content: JSX.Element
 
-  if (tasksCollections.isLoading) {
+  if (tasksQuery.isLoading) {
     content = <LoadingState />
-  } else if (tasksCollections.errorMessage) {
-    content = <ErrorState message={tasksCollections.errorMessage} />
+  } else if (tasksErrorMessage) {
+    content = <ErrorState message={tasksErrorMessage} />
   } else if (!hasTasks) {
     content = <EmptyState />
   } else {

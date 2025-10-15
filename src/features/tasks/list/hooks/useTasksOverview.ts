@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+import { toast } from 'react-toastify'
 import { normalizeError } from '../../../../utils/error'
 import { useTasksQuery } from './useTasksQuery'
 import { useStatusesQuery } from './useStatusesQuery'
@@ -13,31 +15,26 @@ export const useTasksOverview = () => {
   const taskStatusManager = useTaskStatusManager(tasksQuery.tasks, statusesQuery.statuses)
   const taskAssigneeManager = useTaskAssigneeManager(tasksQuery.tasks)
 
-  const tasksErrorMessage = normalizeError(tasksQuery.error, 'Unknown error')
-  const statusUpdateErrorMessage = normalizeError(taskStatusManager.error)
-  const assigneeUpdateErrorMessage = normalizeError(taskAssigneeManager.error)
+  // Handle manager errors with toast notifications
+  useEffect(() => {
+    const errorMessage = normalizeError(taskStatusManager.error)
+    if (errorMessage) {
+      toast.error(errorMessage)
+    }
+  }, [taskStatusManager.error])
+
+  useEffect(() => {
+    const errorMessage = normalizeError(taskAssigneeManager.error)
+    if (errorMessage) {
+      toast.error(errorMessage)
+    }
+  }, [taskAssigneeManager.error])
 
   return {
-    tasksCollections: {
-      data: tasksQuery.tasks,
-      isLoading: tasksQuery.isLoading,
-      errorMessage: tasksErrorMessage,
-    },
-    statusesCollections: {
-      data: statusesQuery.statuses,
-      isLoading: statusesQuery.isLoading,
-    },
-    developersCollections: {
-      data: developersQuery.developers,
-      isLoading: developersQuery.isLoading,
-    },
-    statusManagement: {
-      manager: taskStatusManager,
-      errorMessage: statusUpdateErrorMessage,
-    },
-    assigneeManagement: {
-      manager: taskAssigneeManager,
-      errorMessage: assigneeUpdateErrorMessage,
-    },
+    tasksQuery,
+    statusesQuery,
+    developersQuery,
+    taskStatusManager,
+    taskAssigneeManager,
   }
 }
