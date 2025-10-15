@@ -1,9 +1,25 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent, within } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TaskRow } from '../TaskRow'
 import type { Task, Status, Developer } from '../../../../../types/tasks'
 
 vi.mock('../TaskRow.css', () => ({}))
+vi.mock('react-toastify', () => ({
+  toast: { error: vi.fn() },
+}))
+
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  })
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  )
+}
 
 const sampleTask: Task = {
   taskId: 'task-1',
@@ -45,34 +61,16 @@ const sampleDevelopers: Developer[] = [
 ]
 
 describe('TaskRow', () => {
-  it('renders task information, filters developers, and wires select handlers', () => {
-    const statusChangeHandler = vi.fn()
-    const assigneeChangeHandler = vi.fn()
-
-    const statusControls = {
-      valueFor: vi.fn(() => '1'),
-      onChange: vi.fn(() => statusChangeHandler),
-      pendingTaskId: null,
-      isUpdating: false,
-      statusesLoading: false,
-    }
-
-    const assigneeControls = {
-      valueFor: vi.fn(() => 'dev-1'),
-      onChange: vi.fn(() => assigneeChangeHandler),
-      pendingTaskId: null,
-      isUpdating: false,
-      developersLoading: false,
-    }
-
+  it('renders task information and filters developers by skills', () => {
     render(
       <TaskRow
         task={sampleTask}
         statuses={sampleStatuses}
         developers={sampleDevelopers}
-        statusControls={statusControls}
-        assigneeControls={assigneeControls}
+        statusesLoading={false}
+        developersLoading={false}
       />,
+      { wrapper: createWrapper() }
     )
 
     expect(screen.getByText('Implement authentication')).toBeDefined()
@@ -82,16 +80,8 @@ describe('TaskRow', () => {
     const statusSelect = screen.getByLabelText('Status') as HTMLSelectElement
     const assigneeSelect = screen.getByLabelText('Assignee') as HTMLSelectElement
 
-    expect(statusControls.onChange).toHaveBeenCalledWith(sampleTask)
-    expect(assigneeControls.onChange).toHaveBeenCalledWith(sampleTask)
-
-    fireEvent.change(statusSelect, { target: { value: '2' } })
-    fireEvent.change(assigneeSelect, { target: { value: 'dev-1' } })
-
-    expect(statusChangeHandler).toHaveBeenCalledTimes(1)
-    expect(assigneeChangeHandler).toHaveBeenCalledTimes(1)
-    expect(statusChangeHandler.mock.calls[0][0]).toHaveProperty('target')
-    expect(assigneeChangeHandler.mock.calls[0][0]).toHaveProperty('target')
+    expect(statusSelect).not.toBeDisabled()
+    expect(assigneeSelect).not.toBeDisabled()
 
     const assigneeOptions = within(assigneeSelect).getAllByRole('option')
     expect(assigneeOptions.map((option) => option.textContent)).toEqual([
@@ -106,31 +96,16 @@ describe('TaskRow', () => {
     expect(row.className).not.toContain('task-card--busy')
   })
 
-  it('marks the row busy and disables selects when updates are pending', () => {
-    const statusControls = {
-      valueFor: vi.fn(() => '1'),
-      onChange: vi.fn(() => vi.fn()),
-      pendingTaskId: sampleTask.taskId,
-      isUpdating: true,
-      statusesLoading: false,
-    }
-
-    const assigneeControls = {
-      valueFor: vi.fn(() => 'dev-1'),
-      onChange: vi.fn(() => vi.fn()),
-      pendingTaskId: sampleTask.taskId,
-      isUpdating: true,
-      developersLoading: false,
-    }
-
+  it('disables selects when loading', () => {
     render(
       <TaskRow
         task={sampleTask}
         statuses={sampleStatuses}
         developers={sampleDevelopers}
-        statusControls={statusControls}
-        assigneeControls={assigneeControls}
+        statusesLoading={true}
+        developersLoading={true}
       />,
+      { wrapper: createWrapper() }
     )
 
     const statusSelect = screen.getByLabelText('Status')
@@ -138,9 +113,5 @@ describe('TaskRow', () => {
 
     expect(statusSelect).toBeDisabled()
     expect(assigneeSelect).toBeDisabled()
-
-    const row = screen.getByRole('article')
-    expect(row).toHaveAttribute('aria-busy', 'true')
-    expect(row.className).toContain('task-card--busy')
   })
 })

@@ -18,7 +18,7 @@ class TaskService {
 
   public updateTaskStatus = async (taskId: string, statusId: string) => {
     await httpClient.patch(this.baseUrl, `${TASKS_ENDPOINT}/${taskId}/status`, {
-      body: { statusId },
+      body: { statusId: Number(statusId) },
     })
   }
 

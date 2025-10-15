@@ -13,22 +13,6 @@ import { TasksPanel } from '../TasksPanel'
 
 const TaskRowMock = TaskRow as ReturnType<typeof vi.fn>
 
-const defaultStatusManager = () => ({
-  getStatusValue: vi.fn(() => ''),
-  handleStatusChange: vi.fn(() => vi.fn()),
-  pendingTaskId: null,
-  isUpdating: false,
-  error: null,
-})
-
-const defaultAssigneeManager = () => ({
-  getAssigneeValue: vi.fn(() => 'unassigned'),
-  handleAssigneeChange: vi.fn(() => vi.fn()),
-  pendingTaskId: null,
-  isUpdating: false,
-  error: null,
-})
-
 describe('TasksPanel', () => {
   beforeEach(() => {
     TaskRowMock.mockClear()
@@ -40,8 +24,6 @@ describe('TasksPanel', () => {
         tasksQuery={{ tasks: [], isLoading: true, error: null }}
         statusesQuery={{ statuses: [], isLoading: false, error: null }}
         developersQuery={{ developers: [], isLoading: false, error: null }}
-        taskStatusManager={defaultStatusManager()}
-        taskAssigneeManager={defaultAssigneeManager()}
       />,
     )
 
@@ -55,8 +37,6 @@ describe('TasksPanel', () => {
         tasksQuery={{ tasks: [], isLoading: false, error: new Error('Network error') }}
         statusesQuery={{ statuses: [], isLoading: false, error: null }}
         developersQuery={{ developers: [], isLoading: false, error: null }}
-        taskStatusManager={defaultStatusManager()}
-        taskAssigneeManager={defaultAssigneeManager()}
       />,
     )
 
@@ -70,8 +50,6 @@ describe('TasksPanel', () => {
         tasksQuery={{ tasks: [], isLoading: false, error: null }}
         statusesQuery={{ statuses: [], isLoading: false, error: null }}
         developersQuery={{ developers: [], isLoading: false, error: null }}
-        taskStatusManager={defaultStatusManager()}
-        taskAssigneeManager={defaultAssigneeManager()}
       />,
     )
 
@@ -108,30 +86,12 @@ describe('TasksPanel', () => {
       { developerId: 'dev-2', developerName: 'Dev Two' },
     ]
 
-    const taskStatusManager = {
-      getStatusValue: vi.fn(() => ''),
-      handleStatusChange: vi.fn(() => vi.fn()),
-      pendingTaskId: 'task-2',
-      isUpdating: true,
-      error: null,
-    }
-
-    const taskAssigneeManager = {
-      getAssigneeValue: vi.fn(() => 'unassigned'),
-      handleAssigneeChange: vi.fn(() => vi.fn()),
-      pendingTaskId: 'task-1',
-      isUpdating: false,
-      error: null,
-    }
-
     render(
       <TasksPanel
         title="Engineering Tasks"
         tasksQuery={{ tasks, isLoading: false, error: null }}
         statusesQuery={{ statuses, isLoading: false, error: null }}
         developersQuery={{ developers, isLoading: false, error: null }}
-        taskStatusManager={taskStatusManager}
-        taskAssigneeManager={taskAssigneeManager}
       />,
     )
 
@@ -144,20 +104,8 @@ describe('TasksPanel', () => {
       expect(props.task).toBe(task)
       expect(props.statuses).toBe(statuses)
       expect(props.developers).toBe(developers)
-      expect(props.statusControls).toMatchObject({
-        valueFor: taskStatusManager.getStatusValue,
-        onChange: taskStatusManager.handleStatusChange,
-        pendingTaskId: taskStatusManager.pendingTaskId,
-        isUpdating: taskStatusManager.isUpdating,
-        statusesLoading: false,
-      })
-      expect(props.assigneeControls).toMatchObject({
-        valueFor: taskAssigneeManager.getAssigneeValue,
-        onChange: taskAssigneeManager.handleAssigneeChange,
-        pendingTaskId: taskAssigneeManager.pendingTaskId,
-        isUpdating: taskAssigneeManager.isUpdating,
-        developersLoading: false,
-      })
+      expect(props.statusesLoading).toBe(false)
+      expect(props.developersLoading).toBe(false)
     })
 
     expect(screen.getAllByTestId(/task-row-/)).toHaveLength(tasks.length)
