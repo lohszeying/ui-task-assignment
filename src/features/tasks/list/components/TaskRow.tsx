@@ -14,10 +14,10 @@ const formatSkills = (skills?: Skill[]) => {
 const filterDevelopersBySkills = (developers: Developer[], skills?: Skill[]) => {
   if (!skills?.length) return developers
 
-  const required = new Set(skills.map(s => s.skillId))
+  const required = skills.map(s => s.skillId)
   return developers.filter(dev => {
     const has = new Set(dev.skills?.map(s => s.skillId))
-    return [...required].every(id => has.has(id))
+    return required.every(id => has.has(id))
   })
 }
 
@@ -91,7 +91,6 @@ export const TaskRow = ({
   }
 
   const availableDevelopers = filterDevelopersBySkills(developers, task.skills)
-  const currentAssigneeId = task.developer?.developerId ?? 'unassigned'
   const isStatusDisabled = statuses.length === 0 || statusesLoading || updateStatusMutation.isPending
   const isAssigneeDisabled = developersLoading || updateAssigneeMutation.isPending
   const isRowBusy = updateStatusMutation.isPending || updateAssigneeMutation.isPending
@@ -135,7 +134,7 @@ export const TaskRow = ({
         <TaskSelectControl
           label="Assignee"
           id={`assignee-${task.taskId}`}
-          value={currentAssigneeId}
+          value={currentDeveloperId}
           onChange={handleAssigneeChange}
           disabled={isAssigneeDisabled}
         >
